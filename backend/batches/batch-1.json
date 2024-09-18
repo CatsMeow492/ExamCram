@@ -1,0 +1,1414 @@
+{
+  "Questions": [
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #1"
+          },
+          "question": {
+            "S": "A large mobile network operating company is building a machine learning model to predict customers who are likely to unsubscribe from the service. The company plans to offer an incentive for these customers as the cost of churn is far greater than the cost of the incentive.\nThe model produces the following confusion matrix after evaluating on a test dataset of 100 customers:\n\nBased on the model evaluation results, why is this a viable model for production?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "The model is 86% accurate and the cost incurred by the company as a result of false negatives is less than the false positives."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The precision of the model is 86%, which is less than the accuracy of the model."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The model is 86% accurate and the cost incurred by the company as a result of false positives is less than the false negatives."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The precision of the model is 86%, which is greater than the accuracy of the model."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #2"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is designing a system for improving sales for a company. The objective is to use the large amount of information the company has on users' behavior and product preferences to predict which products users would like based on the users' similarity to other users.\nWhat should the Specialist do to meet this objective?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Build a content-based filtering recommendation engine with Apache Spark ML on Amazon EMR."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Build a collaborative filtering recommendation engine with Apache Spark ML on Amazon EMR."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Build a model-based filtering recommendation engine with Apache Spark ML on Amazon EMR."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Build a combinative filtering recommendation engine with Apache Spark ML on Amazon EMR."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #3"
+          },
+          "question": {
+            "S": "A Mobile Network Operator is building an analytics platform to analyze and optimize a company's operations using Amazon Athena and Amazon S3.\nThe source systems send data in .CSV format in real time. The Data Engineering team wants to transform the data to the Apache Parquet format before storing it on Amazon S3.\nWhich solution takes the LEAST effort to implement?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Ingest .CSV data using Apache Kafka Streams on Amazon EC2 instances and use Kafka Connect S3 to serialize data as Parquet."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Ingest .CSV data from Amazon Kinesis Data Streams and use Amazon Glue to convert data into Parquet."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Ingest .CSV data using Apache Spark Structured Streaming in an Amazon EMR cluster and use Apache Spark to convert data into Parquet."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Ingest .CSV data from Amazon Kinesis Data Streams and use Amazon Kinesis Data Firehose to convert data into Parquet."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #4"
+          },
+          "question": {
+            "S": "A city wants to monitor its air quality to address the consequences of air pollution. A Machine Learning Specialist needs to forecast the air quality in parts per million of contaminates for the next 2 days in the city. As this is a prototype, only daily data from the last year is available.\nWhich model is MOST likely to provide the best results in Amazon SageMaker?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Use the Amazon SageMaker k-Nearest-Neighbors (kNN) algorithm on the single time series consisting of the full year of data with a predictor_type of regressor."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use Amazon SageMaker Random Cut Forest (RCF) on the single time series consisting of the full year of data."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use the Amazon SageMaker Linear Learner algorithm on the single time series consisting of the full year of data with a predictor_type of regressor."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use the Amazon SageMaker Linear Learner algorithm on the single time series consisting of the full year of data with a predictor_type of classifier."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #5"
+          },
+          "question": {
+            "S": "A Data Engineer needs to build a model using a dataset containing customer credit card information.\nHow can the Data Engineer ensure the data remains encrypted and the credit card information is secure?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Use a custom encryption algorithm to encrypt the data and store the data on an Amazon SageMaker instance in a VPC. Use the SageMaker DeepAR algorithm to randomize the credit card numbers."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use an IAM policy to encrypt the data on the Amazon S3 bucket and Amazon Kinesis to automatically discard credit card numbers and insert fake credit card numbers."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use an Amazon SageMaker launch configuration to encrypt the data once it is copied to the SageMaker instance in a VPC. Use the SageMaker principal component analysis (PCA) algorithm to reduce the length of the credit card numbers."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use AWS KMS to encrypt the data on Amazon S3 and Amazon SageMaker, and redact the credit card numbers from the customer data with AWS Glue."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #6"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is using an Amazon SageMaker notebook instance in a private subnet of a corporate VPC. The ML Specialist has important data stored on the Amazon SageMaker notebook instance's Amazon EBS volume, and needs to take a snapshot of that EBS volume. However, the ML Specialist cannot find the Amazon SageMaker notebook instance's EBS volume or Amazon EC2 instance within the VPC.\nWhy is the ML Specialist not seeing the instance visible in the VPC?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon SageMaker notebook instances are based on the EC2 instances within the customer account, but they run outside of VPCs."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon SageMaker notebook instances are based on the Amazon ECS service within customer accounts."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon SageMaker notebook instances are based on EC2 instances running within AWS service accounts."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon SageMaker notebook instances are based on AWS ECS instances running within AWS service accounts."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #7"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is building a model that will perform time series forecasting using Amazon SageMaker. The Specialist has finished training the model and is now planning to perform load testing on the endpoint so they can configure Auto Scaling for the model variant.\nWhich approach will allow the Specialist to review the latency, memory utilization, and CPU utilization during the load test?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Review SageMaker logs that have been written to Amazon S3 by leveraging Amazon Athena and Amazon QuickSight to visualize logs as they are being produced."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Generate an Amazon CloudWatch dashboard to create a single view for the latency, memory utilization, and CPU utilization metrics that are outputted by Amazon SageMaker."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Build custom Amazon CloudWatch Logs and then leverage Amazon ES and Kibana to query and visualize the log data as it is generated by Amazon SageMaker."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Send Amazon CloudWatch Logs that were generated by Amazon SageMaker to Amazon ES and use Kibana to query and visualize the log data."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #8"
+          },
+          "question": {
+            "S": "A manufacturing company has structured and unstructured data stored in an Amazon S3 bucket. A Machine Learning Specialist wants to use SQL to run queries on this data.\nWhich solution requires the LEAST effort to be able to query this data?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Use AWS Data Pipeline to transform the data and Amazon RDS to run queries."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use AWS Glue to catalogue the data and Amazon Athena to run queries."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use AWS Batch to run ETL on the data and Amazon Aurora to run the queries."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use AWS Lambda to transform the data and Amazon Kinesis Data Analytics to run queries."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #9"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is developing a custom video recommendation model for an application. The dataset used to train this model is very large with millions of data points and is hosted in an Amazon S3 bucket. The Specialist wants to avoid loading all of this data onto an Amazon SageMaker notebook instance because it would take hours to move and will exceed the attached 5 GB Amazon EBS volume on the notebook instance.\nWhich approach allows the Specialist to use all the data to train the model?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Load a smaller subset of the data into the SageMaker notebook and train locally. Confirm that the training code is executing and the model parameters seem reasonable. Initiate a SageMaker training job using the full dataset from the S3 bucket using Pipe input mode."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Launch an Amazon EC2 instance with an AWS Deep Learning AMI and attach the S3 bucket to the instance. Train on a small amount of the data to verify the training code and hyperparameters. Go back to Amazon SageMaker and train using the full dataset."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use AWS Glue to train a model using a small subset of the data to confirm that the data will be compatible with Amazon SageMaker. Initiate a SageMaker training job using the full dataset from the S3 bucket using Pipe input mode."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Load a smaller subset of the data into the SageMaker notebook and train locally. Confirm that the training code is executing and the model parameters seem reasonable. Launch an Amazon EC2 instance with an AWS Deep Learning AMI and attach the S3 bucket to train the full dataset."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #10"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist has completed a proof of concept for a company using a small data sample, and now the Specialist is ready to implement an end-to-end solution in AWS using Amazon SageMaker. The historical training data is stored in Amazon RDS.\nWhich approach should the Specialist use for training a model using that data?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Write a direct connection to the SQL database within the notebook and pull data in."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Push the data from Microsoft SQL Server to Amazon S3 using an AWS Data Pipeline and provide the S3 location within the notebook."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Move the data to Amazon DynamoDB and set up a connection to DynamoDB within the notebook to pull data in."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Move the data to Amazon ElastiCache using AWS DMS and set up a connection within the notebook to pull data in for fast access."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #11"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist receives customer data for an online shopping website. The data includes demographics, past visits, and locality information. The Specialist must develop a machine learning approach to identify the customer shopping patterns, preferences, and trends to enhance the website for better service and smart recommendations.\nWhich solution should the Specialist recommend?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Latent Dirichlet Allocation (LDA) for the given collection of discrete data to identify patterns in the customer database."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "A neural network with a minimum of three layers and random initial weights to identify patterns in the customer database."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Collaborative filtering based on user interactions and correlations to identify patterns in the customer database."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Random Cut Forest (RCF) over random subsamples to identify patterns in the customer database."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #12"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is working with a large company to leverage machine learning within its products. The company wants to group its customers into categories based on which customers will and will not churn within the next 6 months. The company has labeled the data available to the Specialist.\nWhich machine learning model type should the Specialist use to accomplish this task?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Linear regression"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Classification"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Clustering"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Reinforcement learning"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #13"
+          },
+          "question": {
+            "S": "The displayed graph is from a forecasting model for testing a time series.\n\nConsidering the graph only, which conclusion should a Machine Learning Specialist make about the behavior of the model?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "The model predicts both the trend and the seasonality well."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The model predicts the trend well, but not the seasonality."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The model predicts the seasonality well, but not the trend."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The model does not predict the trend or the seasonality well."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #14"
+          },
+          "question": {
+            "S": "A company wants to classify user behavior as either fraudulent or normal. Based on internal research, a Machine Learning Specialist would like to build a binary classifier based on two features: age of account and transaction month. The class distribution for these features is illustrated in the figure provided.\n\nBased on this information, which model would have the HIGHEST accuracy?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Long short-term memory (LSTM) model with scaled exponential linear unit (SELU)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Logistic regression"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Support vector machine (SVM) with non-linear kernel"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Single perceptron with tanh activation function"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #15"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist at a company sensitive to security is preparing a dataset for model training. The dataset is stored in Amazon S3 and contains Personally Identifiable Information (PII).\nThe dataset:\n\u2711 Must be accessible from a VPC only.\n\u2711 Must not traverse the public internet.\nHow can these requirements be satisfied?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Create a VPC endpoint and apply a bucket access policy that restricts access to the given VPC endpoint and the VPC."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Create a VPC endpoint and apply a bucket access policy that allows access from the given VPC endpoint and an Amazon EC2 instance."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Create a VPC endpoint and use Network Access Control Lists (NACLs) to allow traffic between only the given VPC endpoint and an Amazon EC2 instance."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Create a VPC endpoint and use security groups to restrict access to the given VPC endpoint and an Amazon EC2 instance."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #16"
+          },
+          "question": {
+            "S": "During mini-batch training of a neural network for a classification problem, a Data Scientist notices that training accuracy oscillates.\nWhat is the MOST likely cause of this issue?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "The class distribution in the dataset is imbalanced."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Dataset shuffling is disabled."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The batch size is too big."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The learning rate is very high."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #17"
+          },
+          "question": {
+            "S": "An employee found a video clip with audio on a company's social media feed. The language used in the video is Spanish. English is the employee's first language, and they do not understand Spanish. The employee wants to do a sentiment analysis.\nWhat combination of services is the MOST efficient to accomplish the task?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon Transcribe, Amazon Translate, and Amazon Comprehend"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon Transcribe, Amazon Comprehend, and Amazon SageMaker seq2seq"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon Transcribe, Amazon Translate, and Amazon SageMaker Neural Topic Model (NTM)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon Transcribe, Amazon Translate, and Amazon SageMaker BlazingText"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #18"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is packaging a custom ResNet model into a Docker container so the company can leverage Amazon SageMaker for training. The Specialist is using Amazon EC2 P3 instances to train the model and needs to properly configure the Docker container to leverage the NVIDIA GPUs.\nWhat does the Specialist need to do?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Bundle the NVIDIA drivers with the Docker image."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Build the Docker container to be NVIDIA-Docker compatible."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Organize the Docker container's file structure to execute on GPU instances."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Set the GPU flag in the Amazon SageMaker CreateTrainingJob request body."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #19"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is building a logistic regression model that will predict whether or not a person will order a pizza. The Specialist is trying to build the optimal model with an ideal classification threshold.\nWhat model evaluation technique should the Specialist use to understand how different classification thresholds will impact the model's performance?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Receiver operating characteristic (ROC) curve"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Misclassification rate"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Root Mean Square Error (RMSE)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "L1 norm"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #20"
+          },
+          "question": {
+            "S": "An interactive online dictionary wants to add a widget that displays words used in similar contexts. A Machine Learning Specialist is asked to provide word features for the downstream nearest neighbor model powering the widget.\nWhat should the Specialist do to meet these requirements?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Create one-hot word encoding vectors."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Produce a set of synonyms for every word using Amazon Mechanical Turk."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Create word embedding vectors that store edit distance with every other word."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Download word embeddings pre-trained on a large corpus."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #21"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is configuring Amazon SageMaker so multiple Data Scientists can access notebooks, train models, and deploy endpoints. To ensure the best operational performance, the Specialist needs to be able to track how often the Scientists are deploying models, GPU and CPU utilization on the deployed SageMaker endpoints, and all errors that are generated when an endpoint is invoked.\nWhich services are integrated with Amazon SageMaker to track this information? (Choose two.)"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "AWS CloudTrail"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "AWS Health"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "AWS Trusted Advisor"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon CloudWatch"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "AWS Config"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #22"
+          },
+          "question": {
+            "S": "A retail chain has been ingesting purchasing records from its network of 20,000 stores to Amazon S3 using Amazon Kinesis Data Firehose. To support training an improved machine learning model, training records will require new but simple transformations, and some attributes will be combined. The model needs to be retrained daily.\nGiven the large number of stores and the legacy data ingestion, which change will require the LEAST amount of development effort?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Require that the stores switch to capturing their data locally on AWS Storage Gateway for loading into Amazon S3, then use AWS Glue to do the transformation."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Deploy an Amazon EMR cluster running Apache Spark with the transformation logic, and have the cluster run each day on the accumulating records in Amazon S3, outputting new/transformed records to Amazon S3."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Spin up a fleet of Amazon EC2 instances with the transformation logic, have them transform the data records accumulating on Amazon S3, and output the transformed records to Amazon S3."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Insert an Amazon Kinesis Data Analytics stream downstream of the Kinesis Data Firehose stream that transforms raw record attributes into simple transformed values using SQL."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #23"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is building a convolutional neural network (CNN) that will classify 10 types of animals. The Specialist has built a series of layers in a neural network that will take an input image of an animal, pass it through a series of convolutional and pooling layers, and then finally pass it through a dense and fully connected layer with 10 nodes. The Specialist would like to get an output from the neural network that is a probability distribution of how likely it is that the input image belongs to each of the 10 classes.\nWhich function will produce the desired output?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Dropout"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Smooth L1 loss"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Softmax"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Rectified linear units (ReLU)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #24"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist trained a regression model, but the first iteration needs optimizing. The Specialist needs to understand whether the model is more frequently overestimating or underestimating the target.\nWhat option can the Specialist use to determine whether it is overestimating or underestimating the target value?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Root Mean Square Error (RMSE)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Residual plots"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Area under the curve"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Confusion matrix"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #25"
+          },
+          "question": {
+            "S": "A company wants to classify user behavior as either fraudulent or normal. Based on internal research, a Machine Learning Specialist would like to build a binary classifier based on two features: age of account and transaction month. The class distribution for these features is illustrated in the figure provided.\n\nBased on this information, which model would have the HIGHEST recall with respect to the fraudulent class?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Decision tree"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Linear support vector machine (SVM)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Naive Bayesian classifier"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Single Perceptron with sigmoidal activation function"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

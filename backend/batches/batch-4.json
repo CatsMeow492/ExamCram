@@ -1,0 +1,574 @@
+{
+  "Questions": [
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #76"
+          },
+          "question": {
+            "S": "A company uses a long short-term memory (LSTM) model to evaluate the risk factors of a particular energy sector. The model reviews multi-page text documents to analyze each sentence of the text and categorize it as either a potential risk or no risk. The model is not performing well, even though the Data Scientist has experimented with many different network structures and tuned the corresponding hyperparameters. Which approach will provide the MAXIMUM performance boost?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Initialize the words by term frequency-inverse document frequency (TF-IDF) vectors pretrained on a large collection of news articles related to the energy sector."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use gated recurrent units (GRUs) instead of LSTM and run the training process until the validation loss stops decreasing."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Reduce the learning rate and run the training process until the training loss stops decreasing."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Initialize the words by word2vec embeddings pretrained on a large collection of news articles related to the energy sector."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #77"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist needs to move and transform data in preparation for training. Some of the data needs to be processed in near-real time, and other data can be moved hourly. There are existing Amazon EMR MapReduce jobs to clean and perform feature engineering on the data. Which of the following services can feed data to the MapReduce jobs? (Choose two.)"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "AWS DMS"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon Kinesis"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "AWS Data Pipeline"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon Athena"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Amazon ES"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #78"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist previously trained a logistic regression model using scikit-learn on a local machine, and the Specialist now wants to deploy it to production for inference only. What steps should be taken to ensure Amazon SageMaker can host a model that was trained locally?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Build the Docker image with the inference code. Tag the Docker image with the registry hostname and upload it to Amazon ECR."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Serialize the trained model so the format is compressed for deployment. Tag the Docker image with the registry hostname and upload it to Amazon S3."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Serialize the trained model so the format is compressed for deployment. Build the image and upload it to Docker Hub."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Build the Docker image with the inference code. Configure Docker Hub and upload the image to Amazon ECR."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #79"
+          },
+          "question": {
+            "S": "A trucking company is collecting live image data from its fleet of trucks across the globe. The data is growing rapidly and approximately 100 GB of new data is generated every day. The company wants to explore machine learning use cases while ensuring the data is only accessible to specific IAM users. Which storage option provides the most processing flexibility and will allow access control with IAM?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Use a database, such as Amazon DynamoDB, to store the images, and set the IAM policies to restrict access to only the desired IAM users."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use an Amazon S3-backed data lake to store the raw images, and set up the permissions using bucket policies."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Set up Amazon EMR with Hadoop Distributed File System (HDFS) to store the files, and restrict access to the EMR instances using IAM policies."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Configure Amazon EFS with IAM policies to make the data available to Amazon EC2 instances owned by the IAM users."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #80"
+          },
+          "question": {
+            "S": "A credit card company wants to build a credit scoring model to help predict whether a new credit card applicant will default on a credit card payment. The company has collected data from a large number of sources with thousands of raw attributes. Early experiments to train a classification model revealed that many attributes are highly correlated, the large number of features slows down the training speed significantly, and that there are some overfitting issues. The Data Scientist on this project would like to speed up the model training time without losing a lot of information from the original dataset. Which feature engineering technique should the Data Scientist use to meet the objectives?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Run self-correlation on all features and remove highly correlated features."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Normalize all numerical values to be between 0 and 1."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Use an autoencoder or principal component analysis (PCA) to replace original features with new features."
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Cluster raw data using k-means and use sample data from each cluster to build a new dataset."
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #81"
+          },
+          "question": {
+            "S": "A Data Scientist is training a multilayer perception (MLP) on a dataset with multiple classes. The target class of interest is unique compared to the other classes within the dataset, but it does not achieve and acceptable recall metric. The Data Scientist has already tried varying the number and size of the MLP's hidden layers, which has not significantly improved the results. A solution to improve recall must be implemented as quickly as possible.\nWhich techniques should be used to meet these requirements?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Gather more data using Amazon Mechanical Turk and then retrain"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Train an anomaly detection model instead of an MLP"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Train an XGBoost model instead of an MLP"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Add class weights to the MLP's loss function and then retrain"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #82"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist works for a credit card processing company and needs to predict which transactions may be fraudulent in near-real time. Specifically, the Specialist must train a model that returns the probability that a given transaction may fraudulent.\nHow should the Specialist frame this business problem?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Streaming classification"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Binary classification"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Multi-category classification"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Regression classification"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #83"
+          },
+          "question": {
+            "S": "A real estate company wants to create a machine learning model for predicting housing prices based on a historical dataset. The dataset contains 32 features.\nWhich model will meet the business requirement?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "Logistic regression"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Linear regression"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "K-means"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "Principal component analysis (PCA)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #84"
+          },
+          "question": {
+            "S": "A Machine Learning Specialist is applying a linear least squares regression model to a dataset with 1,000 records and 50 features. Prior to training, the ML Specialist notices that two features are perfectly linearly dependent.\nWhy could this be an issue for the linear least squares regression model?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "It could cause the backpropagation algorithm to fail during training"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "It could create a singular matrix during optimization, which fails to define a unique solution"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "It could modify the loss function during optimization, causing it to fail during training"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "It could introduce non-linear dependencies within the data, which could invalidate the linear assumptions of the model"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "QuestionID": {
+            "S": "Question #85"
+          },
+          "question": {
+            "S": "Given the following confusion matrix for a movie classification model, what is the true class frequency for Romance and the predicted class frequency for Adventure?"
+          },
+          "options": {
+            "L": [
+              {
+                "M": {
+                  "text": {
+                    "S": "The true class frequency for Romance is 77.56% and the predicted class frequency for Adventure is 20.85%"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The true class frequency for Romance is 57.92% and the predicted class frequency for Adventure is 13.12%"
+                  },
+                  "correct": {
+                    "BOOL": true
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The true class frequency for Romance is 0.78 and the predicted class frequency for Adventure is (0.47-0.32)"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              },
+              {
+                "M": {
+                  "text": {
+                    "S": "The true class frequency for Romance is 77.56% \u05b3\u2014 0.78 and the predicted class frequency for Adventure is 20.85% \u05b3\u2014 0.32"
+                  },
+                  "correct": {
+                    "BOOL": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

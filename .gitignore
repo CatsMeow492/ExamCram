@@ -1,0 +1,44 @@
+   # Node modules
+   node_modules/
+
+   # Build artifacts
+   build/
+   dist/
+
+   # Environment variables
+  .env
+   backend/.env
+   frontend/.env
+   # Ignore all .env files recursively
+   **/.env
+
+   # AWS credentials (if any)
+   *.pembackend/.env
+   *.pem
+
+   backend/.env
+   frontend/.env
+   frontend/node_modules
+   frontend/package-lock.json
+   frontend/yarn.lock
+   frontend/yarn-error.log
+   frontend/yarn-debug.log
+   frontend/yarn-debug.log.old
+   frontend/yarn-debug.log.old
+   frontend/yarn-debug.log.old
+   frontend/yarn-debug.log.old
+
+      # Node modules
+   node_modules/
+
+   # Build artifacts
+   build/
+   dist/
+
+   # Environment variables
+   .env
+   backend/.env
+   frontend/.env
+
+   # AWS credentials (if any)
+   *.pem
