@@ -46,3 +46,7 @@ frontend/.env
 frontend/.env
 backend/.env
 /frontend/node_modules
+
+# The following files/directories are not ignored:
+backend/questions.json
+backend/batches
