@@ -42,3 +42,7 @@
 
    # AWS credentials (if any)
    *.pem
+frontend/.env
+frontend/.env
+backend/.env
+/frontend/node_modules
