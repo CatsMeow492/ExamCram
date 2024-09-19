@@ -2,17 +2,39 @@ package main
 
 import (
     "context"
+    "fmt"
     "log"
     "net/http"
+    "os"
     "github.com/gorilla/mux"
     "github.com/aws/aws-sdk-go/service/dynamodb"
     "google.golang.org/api/idtoken"
+    "github.com/joho/godotenv"
 )
 
 var svc *dynamodb.DynamoDB
 
 func main() {
-    loadEnv()
+    // Attempt to load .env file, but do not exit on failure
+    err := godotenv.Load()
+    if err != nil {
+        fmt.Println("Warning: .env file not found, proceeding without it")
+    }
+
+    // Fetch secrets from AWS Secrets Manager
+    secret, err := getSecret("arn:aws:secretsmanager:us-east-1:500532294210:secret:examcram/openai/api-key-kUfllr")
+    if err != nil {
+        log.Fatal("Error fetching secrets from AWS Secrets Manager:", err)
+    }
+
+    // Set environment variables from secrets
+    os.Setenv("OPENAI_API_KEY", secret["OPENAI_API_KEY"])
+
+    // Retrieve environment variables
+    apiKey := os.Getenv("OPENAI_API_KEY")
+    if apiKey == "" {
+        log.Fatal("Error: OPENAI_API_KEY is not set")
+    }
 
     svc = initAWS()
     loadQuestions(svc)
