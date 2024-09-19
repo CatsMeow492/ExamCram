@@ -242,6 +242,7 @@ function App() {
               onSuccess={handleLoginSuccess}
               onFailure={handleLoginFailure}
               cookiePolicy={'single_host_origin'}
+              redirectUri="http://localhost:3000"
             />
           ) : (
             <>
