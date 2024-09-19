@@ -1,10 +1,10 @@
 {
-  "family": "your-task-family",
+  "family": "examcram-task-family",
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
-      "name": "your-container-name",
-      "image": "your-account-id.dkr.ecr.us-east-1.amazonaws.com/examcram/backend:latest",
+      "name": "examcram-backend",
+      "image": "500532294210.dkr.ecr.us-east-1.amazonaws.com/examcram-backend:latest",
       "essential": true,
       "portMappings": [
         {
@@ -21,6 +21,6 @@
   ],
   "cpu": "256",
   "memory": "512",
-  "executionRoleArn": "arn:aws:iam::your-account-id:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::your-account-id:role/ecsTaskExecutionRole"
+  "executionRoleArn": "arn:aws:iam::500532294210:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::500532294210:role/ecsTaskExecutionRole"
 }
