@@ -4,7 +4,7 @@
   "containerDefinitions": [
     {
       "name": "your-container-name",
-      "image": "your-account-id.dkr.ecr.your-region.amazonaws.com/your-repository-name:latest",
+      "image": "your-account-id.dkr.ecr.us-east-1.amazonaws.com/examcram/backend:latest",
       "essential": true,
       "portMappings": [
         {
