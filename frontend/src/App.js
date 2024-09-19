@@ -229,6 +229,8 @@ function App() {
     console.log('Login Failed:', response);
   };
 
+  console.log('Google Client ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
+
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <div className="App">
