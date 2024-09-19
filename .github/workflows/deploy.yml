@@ -22,12 +22,14 @@ jobs:
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          region: ${{ secrets.AWS_REGION }}  # Add this line
 
       - name: Build and push Docker image
         id: build-image
         run: |
           IMAGE_TAG=latest
-          REPOSITORY_URI=your-account-id.dkr.ecr.your-region.amazonaws.com/your-repository-name
+          REPOSITORY_URI=your-account-id.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-repository-name
           docker build -t $REPOSITORY_URI:$IMAGE_TAG .
           docker push $REPOSITORY_URI:$IMAGE_TAG
 
