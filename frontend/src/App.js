@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './App.css';
 import QuestionCard from './components/QuestionCard';
 import PerformanceMetrics from './components/PerformanceMetrics';
@@ -15,14 +16,17 @@ function App() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [performanceData, setPerformanceData] = useState({});
-  const [showCharts, setShowCharts] = useState(false); // Add state for toggling charts
-  const userId = 'taylor'; // Replace with actual user ID
+  const [showCharts, setShowCharts] = useState(false);
+  const [user, setUser] = useState(null); // Add user state
+  const userId = user ? user.sub : 'guest'; // Use Google ID if user is signed in
 
   useEffect(() => {
-    fetchRandomQuestion();
-    fetchUserMetrics();
-    fetchPerformanceData();
-  }, []);
+    if (user) {
+      fetchRandomQuestion();
+      fetchUserMetrics();
+      fetchPerformanceData();
+    }
+  }, [user]);
 
   const fetchUserMetrics = () => {
     fetch(`/api/metrics?userId=${userId}`)
@@ -198,29 +202,68 @@ function App() {
     ],
   };
 
+  const totalAttempts = correctAnswers + incorrectAnswers;
+  const averageCorrect = totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
+  const lightColor = totalAttempts < 20 || averageCorrect < 80 ? 'red' : 'green';
+
+  const handleLoginSuccess = (response) => {
+    console.log('Login Success:', response);
+    const idToken = response.credential;
+    fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        setUser(data);
+      })
+      .catch(error => {
+        console.error('Error during login:', error);
+      });
+  };
+
+  const handleLoginFailure = (response) => {
+    console.log('Login Failed:', response);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Random Question</h1>
-        {question ? (
-          <QuestionCard
-            question={question}
-            selectedAnswer={selectedAnswer}
-            handleAnswerSelect={handleAnswerSelect}
-            handleSubmitAnswer={handleSubmitAnswer}
-            feedback={feedback}
-            handleExplain={handleExplain}
-            loading={loading}
-            explanation={explanation}
-            fetchRandomQuestion={fetchRandomQuestion}
-            toggleCharts={() => setShowCharts(!showCharts)} // Pass toggle function
-          />
-        ) : (
-          <p>Loading...</p>
-        )}
-        {showCharts && <PerformanceMetrics barData={barData} pieData={pieData} />}
-      </header>
-    </div>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+      <div className="App">
+        <header className="App-header">
+          <h1>{user ? "Random Question" : "Exam Cram"}</h1>
+          <div className="light" style={{ backgroundColor: lightColor }} onClick={() => setShowCharts(!showCharts)}></div>
+          {!user ? (
+            <GoogleLogin
+              onSuccess={handleLoginSuccess}
+              onFailure={handleLoginFailure}
+              cookiePolicy={'single_host_origin'}
+            />
+          ) : (
+            <>
+              {question ? (
+                <QuestionCard
+                  question={question}
+                  selectedAnswer={selectedAnswer}
+                  handleAnswerSelect={handleAnswerSelect}
+                  handleSubmitAnswer={handleSubmitAnswer}
+                  feedback={feedback}
+                  handleExplain={handleExplain}
+                  loading={loading}
+                  explanation={explanation}
+                  fetchRandomQuestion={fetchRandomQuestion}
+                />
+              ) : (
+                <p>Loading...</p>
+              )}
+              {showCharts && <PerformanceMetrics barData={barData} pieData={pieData} />}
+            </>
+          )}
+        </header>
+      </div>
+    </GoogleOAuthProvider>
   );
 }
 

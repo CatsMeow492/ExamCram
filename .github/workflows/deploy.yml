@@ -1,0 +1,40 @@
+name: Deploy to ECR
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image
+        id: build-image
+        run: |
+          IMAGE_TAG=latest
+          REPOSITORY_URI=your-account-id.dkr.ecr.your-region.amazonaws.com/your-repository-name
+          docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+          docker push $REPOSITORY_URI:$IMAGE_TAG
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ecs-task-definition.json
+          service: your-ecs-service-name
+          cluster: your-ecs-cluster-name
+          wait-for-service-stability: true

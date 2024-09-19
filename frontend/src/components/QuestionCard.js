@@ -1,11 +1,10 @@
 import React from 'react';
 
-const QuestionCard = ({ question, selectedAnswer, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, toggleCharts }) => {
+const QuestionCard = ({ question, selectedAnswer, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, lightColor, toggleCharts }) => {
   return (
     <div className="card">
       <div className="card-header">
         <h2>{question.question}</h2>
-        <button onClick={toggleCharts} className="toggle-charts-button">Toggle Charts</button>
       </div>
       <ul>
         {question.options.map((option, idx) => (

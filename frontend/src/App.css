@@ -24,6 +24,12 @@
   text-align: left;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .card h2 {
   font-size: 1em;
   margin-bottom: 20px;
@@ -68,6 +74,16 @@
 .feedback {
   font-size: 1.7em;
   margin-top: 20px;
+}
+
+.light {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .toggle-charts-button {

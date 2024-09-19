@@ -14,6 +14,13 @@ import (
     openai "github.com/sashabaranov/go-openai"
 )
 
+type User struct {
+    UserID    string `json:"userId"`
+    Email     string `json:"email"`
+    Name      string `json:"name"`
+    Picture   string `json:"picture"`
+}
+
 func GetQuestionsHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(questions)
@@ -236,4 +243,67 @@ func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(performance)
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+    var req struct {
+        IDToken string `json:"idToken"`
+    }
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
+        return
+    }
+
+    payload, err := verifyIDToken(req.IDToken)
+    if err != nil {
+        http.Error(w, "Invalid ID token", http.StatusUnauthorized)
+        return
+    }
+
+    userID := payload.Subject
+    email := payload.Claims["email"].(string)
+    name := payload.Claims["name"].(string)
+    picture := payload.Claims["picture"].(string)
+
+    user := User{
+        UserID:  userID,
+        Email:   email,
+        Name:    name,
+        Picture: picture,
+    }
+
+    // Check if user exists
+    result, err := svc.GetItem(&dynamodb.GetItemInput{
+        TableName: aws.String("Users"),
+        Key: map[string]*dynamodb.AttributeValue{
+            "UserID": {
+                S: aws.String(userID),
+            },
+        },
+    })
+    if err != nil {
+        http.Error(w, "Error checking user existence", http.StatusInternalServerError)
+        return
+    }
+
+    if result.Item == nil {
+        // User does not exist, create new user
+        av, err := dynamodbattribute.MarshalMap(user)
+        if err != nil {
+            http.Error(w, "Error marshalling user data", http.StatusInternalServerError)
+            return
+        }
+
+        _, err = svc.PutItem(&dynamodb.PutItemInput{
+            TableName: aws.String("Users"),
+            Item:      av,
+        })
+        if err != nil {
+            http.Error(w, "Error creating user", http.StatusInternalServerError)
+            return
+        }
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(user)
 }
