@@ -4,7 +4,7 @@
   "containerDefinitions": [
     {
       "name": "examcram-backend",
-      "image": "500532294210.dkr.ecr.us-east-1.amazonaws.com/examcram-backend:latest",
+      "image": "500532294210.dkr.ecr.us-east-1.amazonaws.com/examcram/backend:latest",
       "essential": true,
       "portMappings": [
         {
