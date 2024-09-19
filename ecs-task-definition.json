@@ -27,6 +27,12 @@
             "name": "OPENAI_API_KEY",
             "valueFrom": "arn:aws:secretsmanager:us-east-1:500532294210:secret:examcram/openai/api-key-kUfllr"
           }
+        ],
+        "environment": [
+          {
+            "name": "ENV",
+            "value": "production"
+          }
         ]
       }
     ],

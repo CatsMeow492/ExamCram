@@ -21,14 +21,17 @@ func main() {
         fmt.Println("Warning: .env file not found, proceeding without it")
     }
 
-    // Fetch secrets from AWS Secrets Manager
-    secret, err := getSecret("arn:aws:secretsmanager:us-east-1:500532294210:secret:examcram/openai/api-key-kUfllr")
-    if err != nil {
-        log.Fatal("Error fetching secrets from AWS Secrets Manager:", err)
-    }
+    // Check if running in production
+    if os.Getenv("ENV") == "production" {
+        // Fetch secrets from AWS Secrets Manager
+        secret, err := getSecret("arn:aws:secretsmanager:us-east-1:500532294210:secret:examcram/openai/api-key-kUfllr")
+        if err != nil {
+            log.Fatal("Error fetching secrets from AWS Secrets Manager:", err)
+        }
 
-    // Set environment variables from secrets
-    os.Setenv("OPENAI_API_KEY", secret["OPENAI_API_KEY"])
+        // Set environment variables from secrets
+        os.Setenv("OPENAI_API_KEY", secret["OPENAI_API_KEY"])
+    }
 
     // Retrieve environment variables
     apiKey := os.Getenv("OPENAI_API_KEY")
