@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Correct import for jwt-decode
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
@@ -22,7 +22,7 @@ function App() {
   const [userId, setUserId] = useState('guest'); // Initialize userId state
   const [currentQuestionId, setCurrentQuestionId] = useState(null); // Add currentQuestionId to state
 
-  const fetchUserMetrics = () => {
+  const fetchUserMetrics = useCallback(() => {
     fetch(`/api/metrics?userId=${userId}`)
       .then(response => {
         if (!response.ok) {
@@ -35,9 +35,9 @@ function App() {
         setIncorrectAnswers(data.incorrectAnswers || 0);
       })
       .catch(error => console.error('Error fetching user metrics:', error));
-  };
+  }, [userId]);
 
-  const fetchPerformanceData = () => {
+  const fetchPerformanceData = useCallback(() => {
     fetch(`${process.env.REACT_APP_API_URL}/api/performance?userId=${userId}`)
       .then(response => {
         if (!response.ok) {
@@ -49,7 +49,7 @@ function App() {
         setPerformanceData(data || {});
       })
       .catch(error => console.error('Error fetching performance data:', error));
-  };
+  }, [userId]);
 
   useEffect(() => {
     if (user && user.sub) {
@@ -63,7 +63,7 @@ function App() {
       fetchUserMetrics();
       fetchPerformanceData();
     }
-  }, [userId]); // Dependencies are now correctly set
+  }, [userId, fetchUserMetrics, fetchPerformanceData]); // Dependencies are now correctly set
 
   const getUserId = () => {
     return user ? user.sub : null;
