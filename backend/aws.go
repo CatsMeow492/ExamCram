@@ -3,6 +3,7 @@ package main
 import (
     "encoding/json"
     "fmt"
+	"log"
     "github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/aws/session"
     "github.com/aws/aws-sdk-go/service/dynamodb"
@@ -45,15 +46,20 @@ func loadQuestions(svc *dynamodb.DynamoDB) {
     result, err := svc.Scan(&dynamodb.ScanInput{
         TableName: aws.String("Questions"),
     })
-    if (err != nil) {
+    if err != nil {
         panic(fmt.Sprintf("Error scanning DynamoDB table: %v", err))
     }
 
     for _, i := range result.Items {
         question := Question{}
         err = dynamodbattribute.UnmarshalMap(i, &question)
-        if (err != nil) {
+        if err != nil {
             panic(fmt.Sprintf("Error unmarshalling DynamoDB item: %v", err))
+        }
+        if question.ID == "" {
+            // Handle missing ID, possibly log an error or skip the question
+            log.Printf("Question missing ID: %+v\n", question)
+            continue // Skip adding this question
         }
         questions = append(questions, question)
     }

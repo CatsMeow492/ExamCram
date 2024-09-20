@@ -1,8 +1,9 @@
 package main
 
 type Question struct {
-    Question string   `json:"question"`
-    Options  []Option `json:"options"`
+    ID       string   `json:"id" dynamodbav:"QuestionID"`
+    Question string   `json:"question" dynamodbav:"Question"`
+    Options  []Option `json:"options" dynamodbav:"Options"`
 }
 
 type Option struct {
@@ -18,14 +19,21 @@ type ExplainRequest struct {
 }
 
 type UserMetrics struct {
-	UserId string `json:"user_id"`
-	CorrectAnswers int `json:"correct_answers"`
-	IncorrectAnswers int `json:"incorrect_answers"`
+    UserId     string `json:"userId" dynamodbav:"UserId"`
+    Correct    int    `json:"correct"`
+    Incorrect  int    `json:"incorrect"`
 }
 
 type QuestionPerformance struct {
-	UserId     string `json:"user_id"`
-	QuestionId string `json:"question_id"`
-	Correct    int    `json:"correct"`
-	Incorrect  int    `json:"incorrect"`
+    UserId     string `json:"userId" dynamodbav:"UserId"`
+    QuestionId string `json:"questionId" dynamodbav:"QuestionId"`
+    Correct    int    `json:"correct"`
+    Incorrect  int    `json:"incorrect"`
+}
+
+type User struct {
+    UserID    string `json:"userId" dynamodbav:"UserID"`
+    Email     string `json:"email"`
+    Name      string `json:"name"`
+    Picture   string `json:"picture"`
 }

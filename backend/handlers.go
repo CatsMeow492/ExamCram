@@ -3,7 +3,7 @@ package main
 import (
     "encoding/json"
     "log"
-	"fmt"
+    "fmt"
     "math/rand"
     "net/http"
     "os"
@@ -14,13 +14,6 @@ import (
     openai "github.com/sashabaranov/go-openai"
 )
 
-type User struct {
-    UserID    string `json:"userId"`
-    Email     string `json:"email"`
-    Name      string `json:"name"`
-    Picture   string `json:"picture"`
-}
-
 func GetQuestionsHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(questions)
@@ -30,7 +23,6 @@ func GetRandomQuestionHandler(w http.ResponseWriter, r *http.Request) {
     log.Println("Received request to /api/question/random")
     rand.Seed(time.Now().UnixNano())
     randomQuestion := questions[rand.Intn(len(questions))]
-    log.Println("Random question selected:", randomQuestion)
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(randomQuestion)
 }
@@ -118,9 +110,17 @@ func GetUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
     var metrics UserMetrics
+
     if err := json.NewDecoder(r.Body).Decode(&metrics); err != nil {
         log.Println("Error decoding request body:", err)
         http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+	log.Printf("Decoded metrics: %+v\n", metrics)
+
+	if metrics.UserId == "" {
+        log.Println("UserId is required")
+        http.Error(w, "UserId is required", http.StatusBadRequest)
         return
     }
 
@@ -182,67 +182,94 @@ func GetPerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
-    var performance QuestionPerformance
-    if err := json.NewDecoder(r.Body).Decode(&performance); err != nil {
-        log.Println("Error decoding request body:", err)
-        http.Error(w, err.Error(), http.StatusBadRequest)
+    var performanceData QuestionPerformance
+
+    // Decode the request body
+    err := json.NewDecoder(r.Body).Decode(&performanceData)
+    if err != nil {
+        log.Println("Invalid request payload:", err)
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
         return
     }
 
-    result, err := svc.GetItem(&dynamodb.GetItemInput{
+    log.Printf("Received performance data: %+v\n", performanceData)
+
+    if performanceData.UserId == "" || performanceData.QuestionId == "" {
+        log.Println("userId and questionId are required")
+        http.Error(w, "userId and questionId are required", http.StatusBadRequest)
+        return
+    }
+
+    // Initialize DynamoDB session
+    svc := initAWS()
+
+    // Update UserMetrics table
+    updateExpression := "ADD CorrectAnswers :inc"
+    attributeValues := map[string]*dynamodb.AttributeValue{
+        ":inc": {
+            N: aws.String("1"),
+        },
+    }
+
+    if performanceData.Correct == 0 {
+        updateExpression = "ADD IncorrectAnswers :inc"
+    }
+
+    updateItemInput := &dynamodb.UpdateItemInput{
+        TableName: aws.String("UserMetrics"),
+        Key: map[string]*dynamodb.AttributeValue{
+            "UserId": {
+                S: aws.String(performanceData.UserId),
+            },
+        },
+        UpdateExpression:          aws.String(updateExpression),
+        ExpressionAttributeValues: attributeValues,
+        ReturnValues:              aws.String("UPDATED_NEW"),
+    }
+
+    // Log the item before updating it in the table
+    log.Printf("Updating item in UserMetrics: %+v\n", updateItemInput)
+
+    _, err = svc.UpdateItem(updateItemInput)
+    if err != nil {
+        log.Printf("Error updating item in UserMetrics: %v", err)
+        http.Error(w, "Error updating item in UserMetrics", http.StatusInternalServerError)
+        return
+    }
+
+    // Update QuestionPerformance table
+    qpUpdateExpression := "ADD Correct :inc"
+    if performanceData.Correct == 0 {
+        qpUpdateExpression = "ADD Incorrect :inc"
+    }
+
+    qpUpdateItemInput := &dynamodb.UpdateItemInput{
         TableName: aws.String("QuestionPerformance"),
         Key: map[string]*dynamodb.AttributeValue{
             "UserId": {
-                S: aws.String(performance.UserId),
+                S: aws.String(performanceData.UserId),
             },
             "QuestionId": {
-                S: aws.String(performance.QuestionId),
+                S: aws.String(performanceData.QuestionId),
             },
         },
-    })
-    if err != nil {
-        log.Println("Error getting item:", err)
-        http.Error(w, "Error getting item", http.StatusInternalServerError)
-        return
+        UpdateExpression:          aws.String(qpUpdateExpression),
+        ExpressionAttributeValues: attributeValues,
+        ReturnValues:              aws.String("UPDATED_NEW"),
     }
 
-    if result.Item != nil {
-        var existingPerformance QuestionPerformance
-        err = dynamodbattribute.UnmarshalMap(result.Item, &existingPerformance)
-        if err != nil {
-            log.Println("Error unmarshalling item:", err)
-            http.Error(w, "Error unmarshalling item", http.StatusInternalServerError)
-            return
-        }
+    // Log the item before updating it in the table
+    log.Printf("Updating item in QuestionPerformance: %+v\n", qpUpdateItemInput)
 
-        if performance.Correct > 0 {
-            existingPerformance.Correct += performance.Correct
-        } else {
-            existingPerformance.Incorrect += performance.Incorrect
-        }
-
-        performance = existingPerformance
-    }
-
-    item, err := dynamodbattribute.MarshalMap(performance)
+    _, err = svc.UpdateItem(qpUpdateItemInput)
     if err != nil {
-        log.Println("Error marshalling item:", err)
-        http.Error(w, "Error marshalling item", http.StatusInternalServerError)
-        return
-    }
-
-    _, err = svc.PutItem(&dynamodb.PutItemInput{
-        TableName: aws.String("QuestionPerformance"),
-        Item:      item,
-    })
-    if err != nil {
-        log.Println("Error putting item:", err)
-        http.Error(w, "Error putting item", http.StatusInternalServerError)
+        log.Printf("Error updating item in QuestionPerformance: %v", err)
+        http.Error(w, "Error updating item in QuestionPerformance", http.StatusInternalServerError)
         return
     }
 
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(performance)
+    json.NewEncoder(w).Encode(performanceData)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -250,12 +277,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         IDToken string `json:"idToken"`
     }
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        log.Println("Invalid request payload:", err)
         http.Error(w, "Invalid request payload", http.StatusBadRequest)
         return
     }
 
     payload, err := verifyIDToken(req.IDToken)
     if err != nil {
+        log.Println("Invalid ID token:", err)
         http.Error(w, "Invalid ID token", http.StatusUnauthorized)
         return
     }
@@ -272,6 +301,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         Picture: picture,
     }
 
+    log.Printf("User struct: %+v\n", user)
+
     // Check if user exists
     result, err := svc.GetItem(&dynamodb.GetItemInput{
         TableName: aws.String("Users"),
@@ -282,6 +313,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         },
     })
     if err != nil {
+        log.Println("Error checking user existence:", err)
         http.Error(w, "Error checking user existence", http.StatusInternalServerError)
         return
     }
@@ -290,15 +322,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         // User does not exist, create new user
         av, err := dynamodbattribute.MarshalMap(user)
         if err != nil {
+            log.Println("Error marshalling user data:", err)
             http.Error(w, "Error marshalling user data", http.StatusInternalServerError)
             return
         }
+
+        log.Printf("Marshalled user data: %+v\n", av)
 
         _, err = svc.PutItem(&dynamodb.PutItemInput{
             TableName: aws.String("Users"),
             Item:      av,
         })
         if err != nil {
+            log.Println("Error creating user:", err)
             http.Error(w, "Error creating user", http.StatusInternalServerError)
             return
         }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode'; // Correct import for jwt-decode
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './App.css';
@@ -17,16 +18,9 @@ function App() {
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [performanceData, setPerformanceData] = useState({});
   const [showCharts, setShowCharts] = useState(false);
-  const [user, setUser] = useState(null); // Add user state
-  const userId = user ? user.sub : 'guest'; // Use Google ID if user is signed in
-
-  useEffect(() => {
-    if (user) {
-      fetchRandomQuestion();
-      fetchUserMetrics();
-      fetchPerformanceData();
-    }
-  }, [user]);
+  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState('guest'); // Initialize userId state
+  const [currentQuestionId, setCurrentQuestionId] = useState(null); // Add currentQuestionId to state
 
   const fetchUserMetrics = () => {
     fetch(`/api/metrics?userId=${userId}`)
@@ -44,7 +38,7 @@ function App() {
   };
 
   const fetchPerformanceData = () => {
-    fetch(`/api/performance?userId=${userId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/performance?userId=${userId}`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -57,34 +51,83 @@ function App() {
       .catch(error => console.error('Error fetching performance data:', error));
   };
 
-  const updateUserMetrics = (correct, incorrect) => {
-    fetch(`/api/metrics`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId, correctAnswers: correct, incorrectAnswers: incorrect }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setCorrectAnswers(data.correctAnswers);
-        setIncorrectAnswers(data.incorrectAnswers);
-      })
-      .catch(error => console.error('Error updating user metrics:', error));
+  useEffect(() => {
+    if (user && user.sub) {
+      setUserId(user.sub); // Set userId from user object
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (userId !== 'guest') {
+      fetchRandomQuestion();
+      fetchUserMetrics();
+      fetchPerformanceData();
+    }
+  }, [userId]); // Dependencies are now correctly set
+
+  const getUserId = () => {
+    return user ? user.sub : null;
   };
 
+  const updateUserMetrics = (isCorrect) => {
+    const userId = getUserId();
+    if (!userId) {
+        console.error('UserId is not set');
+        return;
+    }
+
+    const userMetrics = {
+        userId: userId,
+        correct: isCorrect ? 1 : 0,
+        incorrect: isCorrect ? 0 : 1,
+    };
+
+    fetch(`${process.env.REACT_APP_API_URL}/api/metrics`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userMetrics),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('User metrics updated:', data);
+    })
+    .catch(error => console.error('Error updating user metrics:', error));
+};
+
   const updatePerformanceData = (questionId, isCorrect) => {
-    fetch(`/api/performance`, {
+    const userId = getUserId();
+    if (!userId) {
+      console.error('UserId is not set');
+      return;
+    }
+  
+    if (!questionId) {
+      console.error('QuestionId is not set');
+      return;
+    }
+  
+    const performanceData = {
+      userId,
+      questionId,
+      correct: isCorrect ? 1 : 0,
+      incorrect: isCorrect ? 0 : 1,
+  };
+  
+    console.log('Sending performance data:', performanceData);
+
+    fetch(`${process.env.REACT_APP_API_URL}/api/performance`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId, questionId, isCorrect }),
+      body: JSON.stringify(performanceData),
     })
       .then(response => {
         if (!response.ok) {
@@ -100,7 +143,7 @@ function App() {
 
   const fetchRandomQuestion = () => {
     console.log('Fetching random question...');
-    fetch(`${process.env.REACT_APP_API_URL}/question/random`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/question/random`)
       .then(response => {
         console.log('Response:', response);
         if (!response.ok) {
@@ -111,6 +154,7 @@ function App() {
       .then(data => {
         console.log('Random question data:', data);
         setQuestion(data);
+        setCurrentQuestionId(data.id); // Now data.id should be correctly set
         setSelectedAnswer(null);
         setFeedback(null);
         setExplanation(null);
@@ -129,13 +173,13 @@ function App() {
       if (isCorrect) {
         const newCorrect = correctAnswers + 1;
         setCorrectAnswers(newCorrect);
-        updateUserMetrics(newCorrect, incorrectAnswers);
+        updateUserMetrics(true); // Pass true for correct answer
       } else {
         const newIncorrect = incorrectAnswers + 1;
         setIncorrectAnswers(newIncorrect);
-        updateUserMetrics(correctAnswers, newIncorrect);
+        updateUserMetrics(false); // Pass false for incorrect answer
       }
-      updatePerformanceData(question.id, isCorrect);
+      updatePerformanceData(currentQuestionId, isCorrect);
     }
   };
 
@@ -147,7 +191,7 @@ function App() {
       };
       console.log('Sending request to /explain with body:', requestBody);
       setLoading(true);
-      fetch(`${process.env.REACT_APP_API_URL}/explain`, {
+      fetch(`${process.env.REACT_APP_API_URL}/api/explain`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -209,16 +253,25 @@ function App() {
   const handleLoginSuccess = (response) => {
     console.log('Login Success:', response);
     const idToken = response.credential;
-    fetch('/api/login', {
+    const decodedToken = jwtDecode(idToken); // Decode the JWT token
+    console.log('Decoded Token:', decodedToken);
+
+    fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ idToken }),
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
-        setUser(data);
+        setUser(decodedToken); // Set user from decoded token
+        setUserId(decodedToken.sub); // Set userId from decoded token
       })
       .catch(error => {
         console.error('Error during login:', error);

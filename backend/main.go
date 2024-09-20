@@ -10,9 +10,21 @@ import (
     "github.com/aws/aws-sdk-go/service/dynamodb"
     "google.golang.org/api/idtoken"
     "github.com/joho/godotenv"
+    "github.com/aws/aws-sdk-go/aws"
+    "github.com/aws/aws-sdk-go/aws/session"
 )
 
 var svc *dynamodb.DynamoDB
+
+func init() {
+    sess, err := session.NewSession(&aws.Config{
+        Region: aws.String("us-east-1"),
+    })
+    if err != nil {
+        log.Fatalf("Failed to create session: %v", err)
+    }
+    svc = dynamodb.New(sess)
+}
 
 func main() {
     // Attempt to load .env file, but do not exit on failure
@@ -43,6 +55,8 @@ func main() {
     loadQuestions(svc)
 
     r := mux.NewRouter()
+    r.Use(corsMiddleware) // Apply CORS middleware globally
+
     r.HandleFunc("/api/questions", GetQuestionsHandler).Methods("GET", "OPTIONS")
     r.HandleFunc("/api/question/random", GetRandomQuestionHandler).Methods("GET", "OPTIONS")
     r.HandleFunc("/api/explain", ExplainHandler).Methods("POST", "OPTIONS")
@@ -50,8 +64,7 @@ func main() {
     r.HandleFunc("/api/metrics", UpdateUserMetricsHandler).Methods("POST", "OPTIONS")
     r.HandleFunc("/api/performance", GetPerformanceDataHandler).Methods("GET", "OPTIONS")
     r.HandleFunc("/api/performance", UpdatePerformanceDataHandler).Methods("POST", "OPTIONS")
-    r.HandleFunc("/api/login", LoginHandler).Methods("POST", "OPTIONS") 
-    r.Use(corsMiddleware)
+    r.HandleFunc("/api/login", LoginHandler).Methods("POST", "OPTIONS") // Ensure this line exists
 
     log.Println("Server is running on port 8080")
     http.ListenAndServe(":8080", r)
@@ -59,7 +72,8 @@ func main() {
 
 func verifyIDToken(token string) (*idtoken.Payload, error) {
     ctx := context.Background()
-    payload, err := idtoken.Validate(ctx, token, "your-google-client-id")
+    clientID := os.Getenv("REACT_APP_GOOGLE_CLIENT_ID")
+    payload, err := idtoken.Validate(ctx, token, clientID)
     if err != nil {
         return nil, err
     }
