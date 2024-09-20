@@ -18,6 +18,12 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Set environment variables
+        run: |
+          echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> $GITHUB_ENV
+          echo "REACT_APP_GOOGLE_CLIENT_ID=${{ secrets.REACT_APP_GOOGLE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_GOOGLE_CLIENT_SECRET=${{ secrets.REACT_APP_GOOGLE_CLIENT_SECRET }}" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: |
           cd frontend
