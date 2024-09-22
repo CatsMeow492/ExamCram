@@ -1,6 +1,6 @@
 import React from 'react';
 
-const QuestionCard = ({ question, selectedAnswer, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, lightColor, toggleCharts }) => {
+const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion }) => {
   return (
     <div className="card">
       <div className="card-header">
@@ -11,7 +11,7 @@ const QuestionCard = ({ question, selectedAnswer, handleAnswerSelect, handleSubm
           <li
             key={idx}
             onClick={() => handleAnswerSelect(option)}
-            className={`option ${selectedAnswer === option ? 'selected' : ''}`}
+            className={`option ${selectedAnswers.includes(option) ? 'selected' : ''}`}
           >
             {option.text}
           </li>

@@ -10,7 +10,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tool
 
 function App() {
   const [question, setQuestion] = useState(null);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const [explanation, setExplanation] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -155,7 +155,7 @@ function App() {
         console.log('Random question data:', data);
         setQuestion(data);
         setCurrentQuestionId(data.id); // Now data.id should be correctly set
-        setSelectedAnswer(null);
+        setSelectedAnswers([]);
         setFeedback(null);
         setExplanation(null);
       })
@@ -163,12 +163,18 @@ function App() {
   };
 
   const handleAnswerSelect = (option) => {
-    setSelectedAnswer(option);
+    setSelectedAnswers(prevSelected => {
+      if (prevSelected.includes(option)) {
+        return prevSelected.filter(answer => answer !== option);
+      } else {
+        return [...prevSelected, option];
+      }
+    });
   };
 
   const handleSubmitAnswer = () => {
-    if (selectedAnswer) {
-      const isCorrect = selectedAnswer.correct;
+    if (selectedAnswers.length > 0) {
+      const isCorrect = selectedAnswers.every(answer => answer.correct) && selectedAnswers.length === question.options.filter(option => option.correct).length;
       setFeedback(isCorrect ? 'Correct!' : 'Incorrect!');
       if (isCorrect) {
         const newCorrect = correctAnswers + 1;
@@ -184,10 +190,10 @@ function App() {
   };
 
   const handleExplain = () => {
-    if (selectedAnswer) {
+    if (selectedAnswers.length > 0) {
       const requestBody = {
         question: question.question,
-        selectedAnswer: selectedAnswer.text,
+        selectedAnswers: selectedAnswers.map(answer => answer.text),
       };
       console.log('Sending request to /explain with body:', requestBody);
       setLoading(true);
@@ -216,7 +222,7 @@ function App() {
           setLoading(false);
         });
     } else {
-      console.log('No selected answer to explain');
+      console.log('No selected answers to explain');
     }
   };
 
@@ -302,7 +308,7 @@ function App() {
               {question ? (
                 <QuestionCard
                   question={question}
-                  selectedAnswer={selectedAnswer}
+                  selectedAnswers={selectedAnswers}
                   handleAnswerSelect={handleAnswerSelect}
                   handleSubmitAnswer={handleSubmitAnswer}
                   feedback={feedback}
