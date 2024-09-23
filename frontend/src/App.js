@@ -19,8 +19,8 @@ function App() {
   const [performanceData, setPerformanceData] = useState({});
   const [showCharts, setShowCharts] = useState(false);
   const [user, setUser] = useState(null);
-  const [userId, setUserId] = useState('guest'); // Initialize userId state
-  const [currentQuestionId, setCurrentQuestionId] = useState(null); // Add currentQuestionId to state
+  const [userId, setUserId] = useState('guest');
+  const [currentQuestionId, setCurrentQuestionId] = useState(null); 
 
   const fetchUserMetrics = useCallback(() => {
     fetch(`/api/metrics?userId=${userId}`)
@@ -53,7 +53,7 @@ function App() {
 
   useEffect(() => {
     if (user && user.sub) {
-      setUserId(user.sub); // Set userId from user object
+      setUserId(user.sub); 
     }
   }, [user]);
 
@@ -63,7 +63,7 @@ function App() {
       fetchUserMetrics();
       fetchPerformanceData();
     }
-  }, [userId, fetchUserMetrics, fetchPerformanceData]); // Dependencies are now correctly set
+  }, [userId, fetchUserMetrics, fetchPerformanceData]); 
 
   const getUserId = () => {
     return user ? user.sub : null;
@@ -154,7 +154,7 @@ function App() {
       .then(data => {
         console.log('Random question data:', data);
         setQuestion(data);
-        setCurrentQuestionId(data.id); // Now data.id should be correctly set
+        setCurrentQuestionId(data.id); 
         setSelectedAnswers([]);
         setFeedback(null);
         setExplanation(null);
@@ -179,11 +179,11 @@ function App() {
       if (isCorrect) {
         const newCorrect = correctAnswers + 1;
         setCorrectAnswers(newCorrect);
-        updateUserMetrics(true); // Pass true for correct answer
+        updateUserMetrics(true); 
       } else {
         const newIncorrect = incorrectAnswers + 1;
         setIncorrectAnswers(newIncorrect);
-        updateUserMetrics(false); // Pass false for incorrect answer
+        updateUserMetrics(false); 
       }
       updatePerformanceData(currentQuestionId, isCorrect);
     }
@@ -259,7 +259,7 @@ function App() {
   const handleLoginSuccess = (response) => {
     console.log('Login Success:', response);
     const idToken = response.credential;
-    const decodedToken = jwtDecode(idToken); // Decode the JWT token
+    const decodedToken = jwtDecode(idToken); 
     console.log('Decoded Token:', decodedToken);
 
     fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
@@ -275,9 +275,9 @@ function App() {
         }
         return response.json();
       })
-      .then(data => {
-        setUser(decodedToken); // Set user from decoded token
-        setUserId(decodedToken.sub); // Set userId from decoded token
+      .then(() => {
+        setUser(decodedToken); 
+        setUserId(decodedToken.sub); 
       })
       .catch(error => {
         console.error('Error during login:', error);
@@ -312,7 +312,7 @@ function App() {
                   handleAnswerSelect={handleAnswerSelect}
                   handleSubmitAnswer={handleSubmitAnswer}
                   feedback={feedback}
-                  handleExplain={handleExplain}
+                  handleExplain={handleExplain} 
                   loading={loading}
                   explanation={explanation}
                   fetchRandomQuestion={fetchRandomQuestion}
