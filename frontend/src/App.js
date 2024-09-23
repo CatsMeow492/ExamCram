@@ -275,7 +275,7 @@ function App() {
         }
         return response.json();
       })
-      .then(data => {
+      .then(() => {
         setUser(decodedToken); 
         setUserId(decodedToken.sub); 
       })

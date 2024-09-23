@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Bar, Pie } from 'react-chartjs-2';
 
 const PerformanceMetrics = ({ barData, pieData }) => {
@@ -8,6 +9,11 @@ const PerformanceMetrics = ({ barData, pieData }) => {
       <Pie data={pieData} />
     </div>
   );
+};
+
+PerformanceMetrics.propTypes = {
+  barData: PropTypes.object.isRequired,
+  pieData: PropTypes.object.isRequired,
 };
 
 export default PerformanceMetrics;
