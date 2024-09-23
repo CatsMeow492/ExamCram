@@ -9,6 +9,7 @@ type Question struct {
 type Option struct {
     Text    string `json:"text"`
     Correct bool   `json:"correct"`
+	Selected bool   `json:"selected"`
 }
 
 var questions []Question

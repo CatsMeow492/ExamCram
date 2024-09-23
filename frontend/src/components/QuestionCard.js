@@ -1,6 +1,7 @@
 import React from 'react';
+import './QuestionCard.css';
 
-const QuestionCard = ({ question, selectedAnswer, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, lightColor, toggleCharts }) => {
+const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion }) => {
   return (
     <div className="card">
       <div className="card-header">
@@ -11,19 +12,19 @@ const QuestionCard = ({ question, selectedAnswer, handleAnswerSelect, handleSubm
           <li
             key={idx}
             onClick={() => handleAnswerSelect(option)}
-            className={`option ${selectedAnswer === option ? 'selected' : ''}`}
+            className={`option ${selectedAnswers.includes(option) ? 'selected' : ''}`}
           >
             {option.text}
           </li>
         ))}
       </ul>
       <button onClick={handleSubmitAnswer}>Submit Answer</button>
-      {feedback && <p className="feedback">{feedback}</p>}
       <button onClick={handleExplain} disabled={loading}>
         {loading ? 'Loading...' : 'Explain'}
       </button>
-      {explanation && <p className="explanation">{explanation}</p>}
       <button onClick={fetchRandomQuestion}>Next Question</button>
+      {feedback && <p className="feedback">{feedback}</p>}
+      {explanation && <p className="explanation">{explanation}</p>}
     </div>
   );
 };
