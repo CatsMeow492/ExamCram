@@ -1,10 +1,14 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Correct import for jwt-decode
+import React, { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import './App.css';
+import './styles/App.css';
 import QuestionCard from './components/QuestionCard';
 import PerformanceMetrics from './components/PerformanceMetrics';
+import useFetchUserMetrics from './hooks/useFetchUserMetrics';
+import useFetchPerformanceData from './hooks/useFetchPerformanceData';
+import useFetchRandomQuestion from './hooks/useFetchRandomQuestion';
+import { handleAnswerSelect, handleSubmitAnswer, handleExplain } from './utils/handlers';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -22,46 +26,9 @@ function App() {
   const [userId, setUserId] = useState('guest');
   const [currentQuestionId, setCurrentQuestionId] = useState(null); 
 
-  const fetchUserMetrics = useCallback(() => {
-    fetch(`/api/metrics?userId=${userId}`)
-        .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-            return response.text().then(text => {
-                console.log('Response text:', text); // Log the response text
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                try {
-                    return JSON.parse(text); // Attempt to parse JSON
-                } catch (e) {
-                    throw new Error(`Failed to parse JSON: ${e.message}`);
-                }
-            });
-        })
-        .then(data => {
-            console.log('Fetched user metrics:', data); // Log the fetched data
-            setCorrectAnswers(data.correctAnswers || 0);
-            setIncorrectAnswers(data.incorrectAnswers || 0);
-            console.log('Correct Answers (state):', data.correctAnswers);
-            console.log('Incorrect Answers (state):', data.incorrectAnswers);
-        })
-        .catch(error => console.error('Error fetching user metrics:', error));
-  }, [userId]);
-
-  const fetchPerformanceData = useCallback(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/performance?userId=${userId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setPerformanceData(data || {});
-      })
-      .catch(error => console.error('Error fetching performance data:', error));
-  }, [userId]);
+  const fetchUserMetricsCallback = useFetchUserMetrics(userId, setCorrectAnswers, setIncorrectAnswers);
+  const fetchPerformanceDataCallback = useFetchPerformanceData(userId, setPerformanceData);
+  const fetchRandomQuestionCallback = useFetchRandomQuestion(setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation);
 
   useEffect(() => {
     if (user && user.sub) {
@@ -71,11 +38,11 @@ function App() {
 
   useEffect(() => {
     if (userId !== 'guest') {
-      fetchRandomQuestion();
-      fetchUserMetrics();
-      fetchPerformanceData();
+      fetchRandomQuestionCallback();
+      fetchUserMetricsCallback();
+      fetchPerformanceDataCallback();
     }
-  }, [userId, fetchUserMetrics, fetchPerformanceData]); 
+  }, [userId, fetchUserMetricsCallback, fetchPerformanceDataCallback, fetchRandomQuestionCallback]); 
 
   const getUserId = () => {
     return user ? user.sub : null;
@@ -122,7 +89,7 @@ function App() {
             setIncorrectAnswers(data.incorrectAnswers);
         })
         .catch(error => console.error('Error updating user metrics:', error));
-};
+  };
 
   const updatePerformanceData = (questionId, isCorrect) => {
     const userId = getUserId();
@@ -164,89 +131,8 @@ function App() {
       .catch(error => console.error('Error updating performance data:', error));
   };
 
-  const fetchRandomQuestion = () => {
-    console.log('Fetching random question...');
-    fetch(`${process.env.REACT_APP_API_URL}/api/question/random`)
-      .then(response => {
-        console.log('Response:', response);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Random question data:', data);
-        setQuestion(data);
-        setCurrentQuestionId(data.id); 
-        setSelectedAnswers([]);
-        setFeedback(null);
-        setExplanation(null);
-      })
-      .catch(error => console.error('Error fetching question:', error));
-  };
-
-  const handleAnswerSelect = (option) => {
-    setSelectedAnswers(prevSelected => {
-      if (prevSelected.includes(option)) {
-        return prevSelected.filter(answer => answer !== option);
-      } else {
-        return [...prevSelected, option];
-      }
-    });
-  };
-
-  const handleSubmitAnswer = () => {
-    if (selectedAnswers.length > 0) {
-      const isCorrect = selectedAnswers.every(answer => answer.correct) && selectedAnswers.length === question.options.filter(option => option.correct).length;
-      setFeedback(isCorrect ? 'Correct!' : 'Incorrect!');
-      if (isCorrect) {
-        updateUserMetrics(true); 
-      } else {
-        updateUserMetrics(false); 
-      }
-      updatePerformanceData(currentQuestionId, isCorrect);
-    }
-  };
-
-  const handleExplain = () => {
-    if (selectedAnswers.length > 0) {
-      const requestBody = {
-        question: question.question,
-        selectedAnswers: selectedAnswers.map(answer => answer.text),
-      };
-      console.log('Sending request to /explain with body:', requestBody);
-      setLoading(true);
-      fetch(`${process.env.REACT_APP_API_URL}/api/explain`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      })
-        .then(response => {
-          console.log('Received response:', response);
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('Received data:', data);
-          setExplanation(data.explanation);
-        })
-        .catch(error => {
-          console.error('Error fetching explanation:', error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      console.log('No selected answers to explain');
-    }
-  };
-
   const barData = {
-    labels: Object.keys(performanceData),
+    labels: Object.keys(performanceData).map(questionId => `Question ${questionId}`),
     datasets: [
       {
         label: 'Correct',
@@ -330,13 +216,13 @@ function App() {
                 <QuestionCard
                   question={question}
                   selectedAnswers={selectedAnswers}
-                  handleAnswerSelect={handleAnswerSelect}
-                  handleSubmitAnswer={handleSubmitAnswer}
+                  handleAnswerSelect={(option) => handleAnswerSelect(option, selectedAnswers, setSelectedAnswers)}
+                  handleSubmitAnswer={() => handleSubmitAnswer(selectedAnswers, question, setFeedback, updateUserMetrics, updatePerformanceData, currentQuestionId)}
                   feedback={feedback}
-                  handleExplain={handleExplain} 
+                  handleExplain={() => handleExplain(selectedAnswers, question, setLoading, setExplanation)} 
                   loading={loading}
                   explanation={explanation}
-                  fetchRandomQuestion={fetchRandomQuestion}
+                  fetchRandomQuestion={fetchRandomQuestionCallback}
                 />
               ) : (
                 <p>Loading...</p>
