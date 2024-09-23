@@ -20,9 +20,9 @@ type ExplainRequest struct {
 }
 
 type UserMetrics struct {
-    UserId     string `json:"userId" dynamodbav:"UserId"`
-    Correct    int    `json:"correct"`
-    Incorrect  int    `json:"incorrect"`
+    UserId          string `json:"userId" dynamodbav:"UserId"`
+    CorrectAnswers  int    `json:"correctAnswers" dynamodbav:"CorrectAnswers"`
+    IncorrectAnswers int   `json:"incorrectAnswers" dynamodbav:"IncorrectAnswers"`
 }
 
 type QuestionPerformance struct {

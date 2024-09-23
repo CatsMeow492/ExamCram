@@ -8,7 +8,7 @@ import (
     "net/http"
     "os"
     "time"
-	"github.com/aws/aws-sdk-go/aws"
+    "github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/service/dynamodb"
     "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
     openai "github.com/sashabaranov/go-openai"
@@ -42,7 +42,7 @@ func ExplainHandler(w http.ResponseWriter, r *http.Request) {
     prompt := fmt.Sprintf("Question: %s\nAnswer: %s\nExplanation:", req.Question, req.SelectedAnswer)
 
     resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
-        Model: openai.GPT3Dot5Turbo, // Use openai.GPT4 if you have access
+        Model: openai.GPT3Dot5Turbo,
         Messages: []openai.ChatCompletionMessage{
             {
                 Role:    openai.ChatMessageRoleUser,
@@ -116,69 +116,79 @@ func UpdateUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
-	log.Printf("Decoded metrics: %+v\n", metrics)
+    log.Printf("Decoded metrics: %+v\n", metrics)
 
-	if metrics.UserId == "" {
+    if metrics.UserId == "" {
         log.Println("UserId is required")
         http.Error(w, "UserId is required", http.StatusBadRequest)
         return
     }
 
-    item, err := dynamodbattribute.MarshalMap(metrics)
-    if err != nil {
-        log.Println("Error marshalling item:", err)
-        http.Error(w, "Error marshalling item", http.StatusInternalServerError)
-        return
-    }
-
-    _, err = svc.PutItem(&dynamodb.PutItemInput{
+    // Fetch current metrics
+    result, err := svc.GetItem(&dynamodb.GetItemInput{
         TableName: aws.String("UserMetrics"),
-        Item:      item,
-    })
-    if err != nil {
-        log.Println("Error putting item:", err)
-        http.Error(w, "Error putting item", http.StatusInternalServerError)
-        return
-    }
-
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(metrics)
-}
-
-func GetPerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
-    userID := r.URL.Query().Get("userId")
-    if userID == "" {
-        http.Error(w, "Missing userId", http.StatusBadRequest)
-        return
-    }
-
-    result, err := svc.Query(&dynamodb.QueryInput{
-        TableName: aws.String("QuestionPerformance"),
-        KeyConditions: map[string]*dynamodb.Condition{
+        Key: map[string]*dynamodb.AttributeValue{
             "UserId": {
-                ComparisonOperator: aws.String("EQ"),
-                AttributeValueList: []*dynamodb.AttributeValue{
-                    {S: aws.String(userID)},
-                },
+                S: aws.String(metrics.UserId),
             },
         },
     })
     if err != nil {
-        log.Println("Error querying table:", err)
-        http.Error(w, "Error querying table", http.StatusInternalServerError)
+        log.Println("Error getting item:", err)
+        http.Error(w, "Error getting item", http.StatusInternalServerError)
         return
     }
 
-    var performances []QuestionPerformance
-    err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &performances)
+    var currentMetrics UserMetrics
+    if result.Item != nil {
+        err = dynamodbattribute.UnmarshalMap(result.Item, &currentMetrics)
+        if err != nil {
+            log.Println("Error unmarshalling item:", err)
+            http.Error(w, "Error unmarshalling item", http.StatusInternalServerError)
+            return
+        }
+    }
+
+    // Increment the current values
+    newCorrectAnswers := currentMetrics.CorrectAnswers + metrics.CorrectAnswers
+    newIncorrectAnswers := currentMetrics.IncorrectAnswers + metrics.IncorrectAnswers
+
+    updateExpression := "SET CorrectAnswers = :correct, IncorrectAnswers = :incorrect"
+    attributeValues := map[string]*dynamodb.AttributeValue{
+        ":correct": {
+            N: aws.String(fmt.Sprintf("%d", newCorrectAnswers)),
+        },
+        ":incorrect": {
+            N: aws.String(fmt.Sprintf("%d", newIncorrectAnswers)),
+        },
+    }
+
+    updateItemInput := &dynamodb.UpdateItemInput{
+        TableName: aws.String("UserMetrics"),
+        Key: map[string]*dynamodb.AttributeValue{
+            "UserId": {
+                S: aws.String(metrics.UserId),
+            },
+        },
+        UpdateExpression:          aws.String(updateExpression),
+        ExpressionAttributeValues: attributeValues,
+        ReturnValues:              aws.String("UPDATED_NEW"),
+    }
+
+    log.Printf("Updating UserMetrics table: UpdateExpression: %s, AttributeValues: %+v\n", updateExpression, attributeValues)
+
+    _, err = svc.UpdateItem(updateItemInput)
     if err != nil {
-        log.Println("Error unmarshalling items:", err)
-        http.Error(w, "Error unmarshalling items", http.StatusInternalServerError)
+        log.Printf("Error updating UserMetrics: %v\n", err)
+        http.Error(w, "Error updating UserMetrics", http.StatusInternalServerError)
         return
     }
+
+    metrics.CorrectAnswers = newCorrectAnswers
+    metrics.IncorrectAnswers = newIncorrectAnswers
 
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(performances)
+    json.NewEncoder(w).Encode(metrics)
 }
 
 func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -199,9 +209,6 @@ func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "userId and questionId are required", http.StatusBadRequest)
         return
     }
-
-    // Initialize DynamoDB session
-    svc := initAWS()
 
     // Update UserMetrics table
     updateExpression := "ADD CorrectAnswers :inc"
@@ -227,13 +234,12 @@ func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
         ReturnValues:              aws.String("UPDATED_NEW"),
     }
 
-    // Log the item before updating it in the table
-    log.Printf("Updating item in UserMetrics: %+v\n", updateItemInput)
+    log.Printf("Updating UserMetrics table: UpdateExpression: %s, AttributeValues: %+v\n", updateExpression, attributeValues)
 
     _, err = svc.UpdateItem(updateItemInput)
     if err != nil {
-        log.Printf("Error updating item in UserMetrics: %v", err)
-        http.Error(w, "Error updating item in UserMetrics", http.StatusInternalServerError)
+        log.Printf("Error updating UserMetrics: %v\n", err)
+        http.Error(w, "Error updating UserMetrics", http.StatusInternalServerError)
         return
     }
 
@@ -258,13 +264,12 @@ func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
         ReturnValues:              aws.String("UPDATED_NEW"),
     }
 
-    // Log the item before updating it in the table
-    log.Printf("Updating item in QuestionPerformance: %+v\n", qpUpdateItemInput)
+    log.Printf("Updating QuestionPerformance table: UpdateExpression: %s, AttributeValues: %+v\n", qpUpdateExpression, attributeValues)
 
     _, err = svc.UpdateItem(qpUpdateItemInput)
     if err != nil {
-        log.Printf("Error updating item in QuestionPerformance: %v", err)
-        http.Error(w, "Error updating item in QuestionPerformance", http.StatusInternalServerError)
+        log.Printf("Error updating QuestionPerformance: %v\n", err)
+        http.Error(w, "Error updating QuestionPerformance", http.StatusInternalServerError)
         return
     }
 
@@ -342,4 +347,42 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(user)
+}
+
+func GetPerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
+    userID := r.URL.Query().Get("userId")
+    if userID == "" {
+        http.Error(w, "Missing userId", http.StatusBadRequest)
+        return
+    }
+
+    result, err := svc.Query(&dynamodb.QueryInput{
+        TableName: aws.String("QuestionPerformance"),
+        KeyConditions: map[string]*dynamodb.Condition{
+            "UserId": {
+                ComparisonOperator: aws.String("EQ"),
+                AttributeValueList: []*dynamodb.AttributeValue{
+                    {
+                        S: aws.String(userID),
+                    },
+                },
+            },
+        },
+    })
+    if err != nil {
+        log.Println("Error querying QuestionPerformance table:", err)
+        http.Error(w, "Error querying QuestionPerformance table", http.StatusInternalServerError)
+        return
+    }
+
+    var performanceData []QuestionPerformance
+    err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &performanceData)
+    if err != nil {
+        log.Println("Error unmarshalling query result:", err)
+        http.Error(w, "Error unmarshalling query result", http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(performanceData)
 }

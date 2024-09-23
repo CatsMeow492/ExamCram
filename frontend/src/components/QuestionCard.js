@@ -20,12 +20,12 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
         ))}
       </ul>
       <button onClick={handleSubmitAnswer}>Submit Answer</button>
-      {feedback && <p className="feedback">{feedback}</p>}
       <button onClick={handleExplain} disabled={loading}>
         {loading ? 'Loading...' : 'Explain'}
       </button>
-      {explanation && <p className="explanation">{explanation}</p>}
       <button onClick={fetchRandomQuestion}>Next Question</button>
+      {feedback && <p className="feedback">{feedback}</p>}
+      {explanation && <p className="explanation">{explanation}</p>}
     </div>
   );
 };
