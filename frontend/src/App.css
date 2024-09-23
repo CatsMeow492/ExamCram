@@ -54,7 +54,7 @@
 }
 
 .card li.selected {
-  background: #d0d0d0;
+  background: #d0d0d0; /* Change this to the desired highlight color */
 }
 
 .card button {
