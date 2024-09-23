@@ -24,17 +24,29 @@ function App() {
 
   const fetchUserMetrics = useCallback(() => {
     fetch(`/api/metrics?userId=${userId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setCorrectAnswers(data.correctAnswers || 0);
-        setIncorrectAnswers(data.incorrectAnswers || 0);
-      })
-      .catch(error => console.error('Error fetching user metrics:', error));
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            return response.text().then(text => {
+                console.log('Response text:', text); // Log the response text
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                try {
+                    return JSON.parse(text); // Attempt to parse JSON
+                } catch (e) {
+                    throw new Error(`Failed to parse JSON: ${e.message}`);
+                }
+            });
+        })
+        .then(data => {
+            console.log('Fetched user metrics:', data); // Log the fetched data
+            setCorrectAnswers(data.correctAnswers || 0);
+            setIncorrectAnswers(data.incorrectAnswers || 0);
+            console.log('Correct Answers (state):', data.correctAnswers);
+            console.log('Incorrect Answers (state):', data.incorrectAnswers);
+        })
+        .catch(error => console.error('Error fetching user metrics:', error));
   }, [userId]);
 
   const fetchPerformanceData = useCallback(() => {
@@ -70,35 +82,46 @@ function App() {
   };
 
   const updateUserMetrics = (isCorrect) => {
-    const userId = getUserId();
-    if (!userId) {
-        console.error('UserId is not set');
-        return;
-    }
+    fetch(`/api/metrics?userId=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const currentCorrectAnswers = data.correctAnswers || 0;
+            const currentIncorrectAnswers = data.incorrectAnswers || 0;
 
-    const userMetrics = {
-        userId: userId,
-        correct: isCorrect ? 1 : 0,
-        incorrect: isCorrect ? 0 : 1,
-    };
+            const newCorrectAnswers = isCorrect ? currentCorrectAnswers + 1 : currentCorrectAnswers;
+            const newIncorrectAnswers = isCorrect ? currentIncorrectAnswers : currentIncorrectAnswers + 1;
 
-    fetch(`${process.env.REACT_APP_API_URL}/api/metrics`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userMetrics),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('User metrics updated:', data);
-    })
-    .catch(error => console.error('Error updating user metrics:', error));
+            const userMetrics = {
+                userId: userId,
+                correctAnswers: newCorrectAnswers,
+                incorrectAnswers: newIncorrectAnswers,
+            };
+
+            return fetch(`${process.env.REACT_APP_API_URL}/api/metrics`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userMetrics),
+            });
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('User metrics updated:', data);
+            setCorrectAnswers(data.correctAnswers);
+            setIncorrectAnswers(data.incorrectAnswers);
+        })
+        .catch(error => console.error('Error updating user metrics:', error));
 };
 
   const updatePerformanceData = (questionId, isCorrect) => {
@@ -177,12 +200,8 @@ function App() {
       const isCorrect = selectedAnswers.every(answer => answer.correct) && selectedAnswers.length === question.options.filter(option => option.correct).length;
       setFeedback(isCorrect ? 'Correct!' : 'Incorrect!');
       if (isCorrect) {
-        const newCorrect = correctAnswers + 1;
-        setCorrectAnswers(newCorrect);
         updateUserMetrics(true); 
       } else {
-        const newIncorrect = incorrectAnswers + 1;
-        setIncorrectAnswers(newIncorrect);
         updateUserMetrics(false); 
       }
       updatePerformanceData(currentQuestionId, isCorrect);
@@ -251,6 +270,8 @@ function App() {
       },
     ],
   };
+
+  console.log('PieData', pieData);
 
   const totalAttempts = correctAnswers + incorrectAnswers;
   const averageCorrect = totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
