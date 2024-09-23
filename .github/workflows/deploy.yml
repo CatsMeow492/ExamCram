@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'backend/**'  # Only run when there are changes in the backend directory
 
 jobs:
   build-and-deploy:

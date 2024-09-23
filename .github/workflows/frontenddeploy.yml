@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'frontend/**'  # Only run when there are changes in the frontend directory
 
 jobs:
   build-and-deploy:

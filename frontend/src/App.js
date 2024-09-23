@@ -312,7 +312,7 @@ function App() {
                   handleAnswerSelect={handleAnswerSelect}
                   handleSubmitAnswer={handleSubmitAnswer}
                   feedback={feedback}
-                  handleExplain={handleExplain}
+                  handleExplain={handleExplain} // Pass handleExplain as a prop
                   loading={loading}
                   explanation={explanation}
                   fetchRandomQuestion={fetchRandomQuestion}
