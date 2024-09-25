@@ -65,7 +65,7 @@ func main() {
     r.HandleFunc("/api/performance", GetPerformanceDataHandler).Methods("GET", "OPTIONS")
     r.HandleFunc("/api/performance", UpdatePerformanceDataHandler).Methods("POST", "OPTIONS")
     r.HandleFunc("/api/login", LoginHandler).Methods("POST", "OPTIONS")
-    r.HandleFunc("/health", HealthCheckHandler).Methods("GET") 
+    r.HandleFunc("/api/health", HealthCheckHandler).Methods("GET") 
 
     log.Println("Server is running on port 8080")
     http.ListenAndServe(":8080", r)
