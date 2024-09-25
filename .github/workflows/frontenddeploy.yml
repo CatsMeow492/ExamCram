@@ -54,3 +54,4 @@ jobs:
           aws-region: 'us-east-1'
           command: >
             cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
