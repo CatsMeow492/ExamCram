@@ -157,8 +157,6 @@ function App() {
     ],
   };
 
-  console.log('PieData', pieData);
-
   const totalAttempts = correctAnswers + incorrectAnswers;
   const averageCorrect = totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
   const lightColor = totalAttempts < 20 || averageCorrect < 80 ? 'red' : 'green';
