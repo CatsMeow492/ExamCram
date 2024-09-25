@@ -12,16 +12,6 @@ import { handleAnswerSelect, handleSubmitAnswer, handleExplain } from './utils/h
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-// TODO: Add a health check to the backend
-// TODO: Add a health check to the frontend
-// TODO: Add a health check to the database
-// TODO: Add a health check to the API
-// TODO: Add a health check to the frontend
-// TODO: Add a health check to the backend
-// TODO: Add a health check to the database
-// TODO: Add a health check to the API
-// TODO: Add a health check to the frontend
-
 function App() {
   const [question, setQuestion] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
