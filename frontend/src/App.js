@@ -49,7 +49,7 @@ function App() {
   };
 
   const updateUserMetrics = (isCorrect) => {
-    fetch(`/metrics?userId=${userId}`)
+    fetch(`/api/metrics?userId=${userId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -69,7 +69,7 @@ function App() {
                 incorrectAnswers: newIncorrectAnswers,
             };
 
-            return fetch(`${process.env.REACT_APP_API_URL}/metrics`, {
+            return fetch(`${process.env.REACT_APP_API_URL}/api/metrics`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ function App() {
   
     console.log('Sending performance data:', performanceData);
 
-    fetch(`${process.env.REACT_APP_API_URL}/performance`, {
+    fetch(`${process.env.REACT_APP_API_URL}/api/performance`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ function App() {
     const decodedToken = jwtDecode(idToken); 
     console.log('Decoded Token:', decodedToken);
 
-    fetch(`${process.env.REACT_APP_API_URL}/login`, {
+    fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
