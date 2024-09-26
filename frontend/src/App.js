@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './styles/App.css';
@@ -9,6 +8,7 @@ import useFetchUserMetrics from './hooks/useFetchUserMetrics';
 import useFetchPerformanceData from './hooks/useFetchPerformanceData';
 import useFetchRandomQuestion from './hooks/useFetchRandomQuestion';
 import { handleAnswerSelect, handleSubmitAnswer, handleExplain } from './utils/handlers';
+import { jwtDecode } from 'jwt-decode';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -103,21 +103,21 @@ function App() {
       return;
     }
   
-    const performanceData = {
+    const newPerformanceData = {
       userId,
       questionId,
       correct: isCorrect ? 1 : 0,
       incorrect: isCorrect ? 0 : 1,
-  };
+    };
   
-    console.log('Sending performance data:', performanceData);
+    console.log('Sending performance data:', newPerformanceData);
 
     fetch(`${process.env.REACT_APP_API_URL}/api/performance`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(performanceData),
+      body: JSON.stringify(newPerformanceData),
     })
       .then(response => {
         if (!response.ok) {
@@ -126,19 +126,19 @@ function App() {
         return response.json();
       })
       .then(data => {
-        setPerformanceData(data);
+        setPerformanceData(prevData => [...prevData, newPerformanceData]);
       })
       .catch(error => console.error('Error updating performance data:', error));
   };
 
   // Transform the API response into the expected format
-  const transformedPerformanceData = performanceData.reduce((acc, item) => {
+  const transformedPerformanceData = Array.isArray(performanceData) ? performanceData.reduce((acc, item) => {
     acc[item.questionId] = {
       correct: item.correct,
       incorrect: item.incorrect,
     };
     return acc;
-  }, {});
+  }, {}) : {};
 
   const barData = {
     labels: Object.keys(transformedPerformanceData).map(questionId => questionId),
