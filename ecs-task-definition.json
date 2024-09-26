@@ -42,5 +42,23 @@
     "cpu": "256",
     "memory": "512",
     "executionRoleArn": "arn:aws:iam::500532294210:role/ecsTaskExecutionRole",
-    "taskRoleArn": "arn:aws:iam::500532294210:role/ecsTaskExecutionRole"
-  }
+    "taskRoleArn": "arn:aws:iam::500532294210:role/ecsTaskExecutionRole",
+    "loadBalancers": [
+      {
+        "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:500532294210:targetgroup/examcram/47199c37d6535c14",
+        "containerName": "examcram-backend",
+        "containerPort": 8080
+      }
+    ],
+    "networkConfiguration": {
+      "awsvpcConfiguration": {
+        "subnets": [
+          "subnet-c1cd388d"
+        ],
+        "securityGroups": [
+          "sg-6dac8372"
+        ],
+        "assignPublicIp": "ENABLED"
+      }
+    }
+}
