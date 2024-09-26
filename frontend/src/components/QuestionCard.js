@@ -7,6 +7,7 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
     <div className="card">
       <div className="card-header">
         <h2>{question.question}</h2>
+        {question.imageUrl && <img src={question.imageUrl} alt="Question" className="question-image" />}
       </div>
       <ul>
         {question.options.map((option, idx) => (
@@ -39,6 +40,7 @@ QuestionCard.propTypes = {
         correct: PropTypes.bool.isRequired,
       })
     ).isRequired,
+    imageUrl: PropTypes.string, // Add this line to propTypes
   }).isRequired,
   selectedAnswers: PropTypes.arrayOf(
     PropTypes.shape({

@@ -1,0 +1,4 @@
+.question-image {
+  max-width: 50%;
+  height: auto; /* Maintain aspect ratio */
+}

@@ -26,6 +26,10 @@ def convert_to_dynamodb_format(input_file, output_dir):
                     }
                 }
             }
+            # Add image_url if it exists
+            if "imageUrl" in question_data:
+                item["PutRequest"]["Item"]["imageUrl"] = {"S": question_data["imageUrl"]}
+            
             dynamodb_items.append(item)
 
     # Split into batches of 25 items
