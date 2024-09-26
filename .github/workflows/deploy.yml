@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'backend/**'  # Only run when there are changes in the backend directory
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
