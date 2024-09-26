@@ -12,16 +12,6 @@ import { handleAnswerSelect, handleSubmitAnswer, handleExplain } from './utils/h
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-// TODO: Add a health check to the backend
-// TODO: Add a health check to the frontend
-// TODO: Add a health check to the database
-// TODO: Add a health check to the API
-// TODO: Add a health check to the frontend
-// TODO: Add a health check to the backend
-// TODO: Add a health check to the database
-// TODO: Add a health check to the API
-// TODO: Add a health check to the frontend
-
 function App() {
   const [question, setQuestion] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
@@ -30,7 +20,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
-  const [performanceData, setPerformanceData] = useState({});
+  const [performanceData, setPerformanceData] = useState([]);
   const [showCharts, setShowCharts] = useState(false);
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState('guest');
@@ -141,18 +131,27 @@ function App() {
       .catch(error => console.error('Error updating performance data:', error));
   };
 
+  // Transform the API response into the expected format
+  const transformedPerformanceData = performanceData.reduce((acc, item) => {
+    acc[item.questionId] = {
+      correct: item.correct,
+      incorrect: item.incorrect,
+    };
+    return acc;
+  }, {});
+
   const barData = {
-    labels: Object.keys(performanceData).map(questionId => `Question ${questionId}`),
+    labels: Object.keys(transformedPerformanceData).map(questionId => questionId),
     datasets: [
       {
         label: 'Correct',
         backgroundColor: 'blue',
-        data: Object.values(performanceData).map(d => d.correct || 0),
+        data: Object.values(transformedPerformanceData).map(d => d.correct || 0),
       },
       {
         label: 'Incorrect',
         backgroundColor: 'red',
-        data: Object.values(performanceData).map(d => d.incorrect || 0),
+        data: Object.values(transformedPerformanceData).map(d => d.incorrect || 0),
       },
     ],
   };
