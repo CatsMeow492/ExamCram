@@ -41,14 +41,24 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ecs-task-definition.json
-          service: examcram-backend-service
-          cluster: examcram-cluster
-          wait-for-service-stability: true
-          force-new-deployment: true  # Add this line to force a new deployment
+      - name: Register new task definition
+        id: register-task-def
+        run: |
+          aws ecs register-task-definition \
+            --cli-input-json file://ecs-task-definition.json
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster examcram-cluster \
+            --service examcram-backend-service \
+            --force-new-deployment \
+            --load-balancers targetGroupArn=arn:aws:elasticloadbalancing:us-east-1:500532294210:targetgroup/examcram/47199c37d6535c14,containerName=examcram-backend,containerPort=8080 \
+            --network-configuration "awsvpcConfiguration={subnets=[subnet-c1cd388d],securityGroups=[sg-6dac8372],assignPublicIp=ENABLED}"
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
