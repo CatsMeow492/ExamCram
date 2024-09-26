@@ -125,7 +125,7 @@ function App() {
         }
         return response.json();
       })
-      .then(data => {
+      .then(() => {
         setPerformanceData(prevData => [...prevData, newPerformanceData]);
       })
       .catch(error => console.error('Error updating performance data:', error));
