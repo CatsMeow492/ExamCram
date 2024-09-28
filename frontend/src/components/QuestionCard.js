@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ReactMarkdown from 'react-markdown'; // Import react-markdown
 import '../styles/QuestionCard.css';
 
 const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion }) => {
@@ -26,7 +27,7 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
       </button>
       <button onClick={fetchRandomQuestion}>Next Question</button>
       {feedback && <p className="feedback">{feedback}</p>}
-      {explanation && <p className="explanation">{explanation}</p>}
+      {explanation && <ReactMarkdown className="explanation" children={explanation} />} {/* Render explanation as markdown */}
     </div>
   );
 };
