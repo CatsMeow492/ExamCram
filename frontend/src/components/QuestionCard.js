@@ -27,7 +27,7 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
       </button>
       <button onClick={fetchRandomQuestion}>Next Question</button>
       {feedback && <p className="feedback">{feedback}</p>}
-      {explanation && <ReactMarkdown className="explanation" children={explanation} />} {/* Render explanation as markdown */}
+      {explanation && <ReactMarkdown className="explanation">{explanation}</ReactMarkdown>} {/* Render explanation as markdown */}
     </div>
   );
 };
