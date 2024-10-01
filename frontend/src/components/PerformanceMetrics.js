@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto'; // Ensure you have this import for Chart.js 3.x
 import '../styles/PerformanceMetrics.css'; // Import the CSS file
 
 const PerformanceMetrics = ({ barData, pieData }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // Calculate the percentage of incorrect answers for each question
   const totalAttemptsPerQuestion = barData.datasets[0].data.map((value, index) => {
     const correct = barData.datasets[1]?.data[index] || 0;
@@ -120,7 +133,31 @@ const PerformanceMetrics = ({ barData, pieData }) => {
   return (
     <div className="performance-metrics">
       <div className="chart-container">
-        <Bar data={sortedBarData} options={barOptions} />
+        {isMobile ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Correct %</th>
+                <th>Incorrect %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedData.map((item, index) => {
+                const correctPercentage = 100 - item.value;
+                return (
+                  <tr key={index}>
+                    <td>{barData.labels[item.index]}</td>
+                    <td>{correctPercentage.toFixed(2)}%</td>
+                    <td>{item.value.toFixed(2)}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <Bar data={sortedBarData} options={barOptions} />
+        )}
       </div>
       <div className="chart-container">
         <Pie data={pieData} options={pieOptions} />
