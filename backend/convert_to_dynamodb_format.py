@@ -26,8 +26,8 @@ def convert_to_dynamodb_format(input_file, output_dir):
                     }
                 }
             }
-            # Add image_url if it exists
-            if "imageUrl" in question_data:
+            # Add image_url if it exists and is not None
+            if "imageUrl" in question_data and question_data["imageUrl"] is not None:
                 item["PutRequest"]["Item"]["imageUrl"] = {"S": question_data["imageUrl"]}
             
             dynamodb_items.append(item)
