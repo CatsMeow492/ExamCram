@@ -15,6 +15,8 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
+var maxTokens = 350
+
 func GetQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(questions)
@@ -41,9 +43,9 @@ func ExplainHandler(w http.ResponseWriter, r *http.Request) {
 	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 
 	prompt := fmt.Sprintf(
-		"Question: %s\nAnswer: %s\nExplanation: Please explain the answer in a simple, intuitive, and easy-to-remember way:",
+		"Question: %s\nAnswer: %s\nExplanation: Please explain the answer in a simple, intuitive, and easy-to-remember way. Limit your response to %d tokens.",
 		req.Question,
-		req.SelectedAnswer)
+		req.SelectedAnswer, maxTokens)
 
 	resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
 		Model: openai.GPT4o,
@@ -53,7 +55,7 @@ func ExplainHandler(w http.ResponseWriter, r *http.Request) {
 				Content: prompt,
 			},
 		},
-		MaxTokens: 150,
+		MaxTokens: maxTokens,
 	})
 	if err != nil {
 		log.Println("Error calling OpenAI API:", err)
@@ -395,4 +397,49 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
+
+func HintHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request to /hint")
+	var req HintRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("Error decoding request body:", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	// Initialize OpenAI client
+	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+
+	prompt := fmt.Sprintf(
+		"Question: %s\nHint: Please provide a hint to help answer this question, make sure to define all the terms and services necessary to understand the question. The hint should be concise and to the point and limited to %d tokens.",
+		req.Question, maxTokens)
+
+	resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
+		Model: openai.GPT4o,
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: prompt,
+			},
+		},
+		MaxTokens: maxTokens,
+	})
+	if err != nil {
+		log.Println("Error calling OpenAI API:", err)
+		http.Error(w, "Error generating hint", http.StatusInternalServerError)
+		return
+	}
+
+	hint := resp.Choices[0].Message.Content
+
+	response := map[string]string{
+		"hint": hint,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Println("Error encoding response:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

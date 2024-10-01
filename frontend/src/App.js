@@ -7,7 +7,7 @@ import PerformanceMetrics from './components/PerformanceMetrics';
 import useFetchUserMetrics from './hooks/useFetchUserMetrics';
 import useFetchPerformanceData from './hooks/useFetchPerformanceData';
 import useFetchRandomQuestion from './hooks/useFetchRandomQuestion';
-import { handleAnswerSelect, handleSubmitAnswer, handleExplain } from './utils/handlers';
+import { handleAnswerSelect, handleSubmitAnswer, handleExplain, handleHint } from './utils/handlers';
 import { jwtDecode } from 'jwt-decode';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -226,7 +226,8 @@ function App() {
                   handleAnswerSelect={(option) => handleAnswerSelect(option, selectedAnswers, setSelectedAnswers)}
                   handleSubmitAnswer={() => handleSubmitAnswer(selectedAnswers, question, setFeedback, updateUserMetrics, updatePerformanceData, currentQuestionId)}
                   feedback={feedback}
-                  handleExplain={() => handleExplain(selectedAnswers, question, setLoading, setExplanation)} 
+                  handleExplain={() => handleExplain(selectedAnswers, question, setLoading, setExplanation)}
+                  handleHint={() => handleHint(question, setLoading, setExplanation)}
                   loading={loading}
                   explanation={explanation}
                   fetchRandomQuestion={fetchRandomQuestionCallback}

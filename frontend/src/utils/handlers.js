@@ -38,6 +38,7 @@ export const handleExplain = (selectedAnswers, question, setLoading, setExplanat
                 return response.json();
             })
             .then(data => {
+                console.log('Explanation:', data.explanation);
                 setExplanation(data.explanation);
             })
             .catch(error => {
@@ -50,3 +51,33 @@ export const handleExplain = (selectedAnswers, question, setLoading, setExplanat
         console.log('No selected answers to explain');
     }
 };
+
+export const handleHint = (question, setLoading, setExplanation) => {
+        const requestBody = {
+            question: question.question,
+        }
+        setLoading(true);
+        fetch(`${process.env.REACT_APP_API_URL}/api/hint`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Hint:', data.hint);
+                setExplanation(data.hint);
+            })
+            .catch(error => {
+                console.error('Error fetching hint:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
