@@ -59,6 +59,7 @@ QuestionCard.propTypes = {
   loading: PropTypes.bool.isRequired,
   explanation: PropTypes.string,
   fetchRandomQuestion: PropTypes.func.isRequired,
+  handleHint: PropTypes.func.isRequired, // Added handleHint to propTypes
 };
 
 export default QuestionCard;
