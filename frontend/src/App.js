@@ -235,7 +235,9 @@ function App() {
               ) : (
                 <p>Loading...</p>
               )}
-              {showCharts && <PerformanceMetrics barData={barData} pieData={pieData} />}
+              
+              {showCharts && <div className="chart-container"><PerformanceMetrics barData={barData} pieData={pieData} /></div>}
+              
             </>
           )}
         </header>
