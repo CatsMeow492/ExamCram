@@ -5,6 +5,36 @@ import 'chart.js/auto'; // Ensure you have this import for Chart.js 3.x
 import '../styles/PerformanceMetrics.css'; // Import the CSS file
 
 const PerformanceMetrics = ({ barData, pieData }) => {
+  // Calculate the percentage of incorrect answers for each question
+  const totalAttemptsPerQuestion = barData.datasets[0].data.map((value, index) => {
+    const correct = barData.datasets[1]?.data[index] || 0;
+    return value + correct;
+  });
+
+  const percentageData = barData.datasets[0].data.map((value, index) => {
+    const totalAttempts = totalAttemptsPerQuestion[index];
+    return totalAttempts > 0 ? (value / totalAttempts) * 100 : 0;
+  });
+
+  // Sort the data to get the top 10 questions answered incorrectly the most
+  const sortedData = percentageData
+    .map((value, index) => ({ value, index }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+
+  const sortedBarData = {
+    ...barData,
+    datasets: [{
+      ...barData.datasets[0],
+      data: sortedData.map(item => item.value),
+      label: 'Incorrect',
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+      borderColor: 'rgba(255, 99, 132, 1)',
+      borderWidth: 1,
+    }],
+    labels: sortedData.map(item => barData.labels[item.index]),
+  };
+
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false, // Allow the chart to take up more space
@@ -36,6 +66,8 @@ const PerformanceMetrics = ({ barData, pieData }) => {
         },
         ticks: {
           color: '#333',
+          maxRotation: 90,
+          minRotation: 45,
         },
       },
       y: {
@@ -43,7 +75,11 @@ const PerformanceMetrics = ({ barData, pieData }) => {
           color: '#eee',
         },
         ticks: {
-          color: '#333',
+          callback: function(value) {
+            return value + '%'; // Add percentage symbol to y-axis ticks
+          },
+          beginAtZero: true,
+          max: 100, // Set the maximum value to 100%
         },
       },
     },
@@ -84,7 +120,7 @@ const PerformanceMetrics = ({ barData, pieData }) => {
   return (
     <div className="performance-metrics">
       <div className="chart-container">
-        <Bar data={barData} options={barOptions} />
+        <Bar data={sortedBarData} options={barOptions} />
       </div>
       <div className="chart-container">
         <Pie data={pieData} options={pieOptions} />
