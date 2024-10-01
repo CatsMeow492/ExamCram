@@ -20,6 +20,10 @@ type ExplainRequest struct {
 	SelectedAnswer string `json:"selectedAnswer"`
 }
 
+type HintRequest struct {
+	Question string `json:"question"`
+}
+
 type UserMetrics struct {
 	UserId           string `json:"userId" dynamodbav:"UserId"`
 	CorrectAnswers   int    `json:"correctAnswers" dynamodbav:"CorrectAnswers"`

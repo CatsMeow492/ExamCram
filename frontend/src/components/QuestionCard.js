@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown'; // Import react-markdown
 import '../styles/QuestionCard.css';
 
-const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion }) => {
+const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, handleHint }) => {
   return (
     <div className="card">
       <div className="card-header">
@@ -24,6 +24,9 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
       <button onClick={handleSubmitAnswer}>Submit Answer</button>
       <button onClick={handleExplain} disabled={loading}>
         {loading ? 'Loading...' : 'Explain'}
+      </button>
+      <button onClick={handleHint} disabled={loading}>
+        {loading ? 'Loading...' : 'Hint'}
       </button>
       <button onClick={fetchRandomQuestion}>Next Question</button>
       {feedback && <p className="feedback">{feedback}</p>}
