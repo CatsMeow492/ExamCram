@@ -12,9 +12,9 @@ function StudyOptions() {
   return (
     <div className="study-options">
       <h2>Select Study Option</h2>
-      <button className="study-button" onClick={() => handleOptionClick('random')}>Random Question</button>
-      <button className="study-button" onClick={() => handleOptionClick('practice-test')}>Practice Test</button>
-      <button className="study-button" onClick={() => handleOptionClick('practice-worst')}>Practice Worst</button>
+      <button className="vending-button" onClick={() => handleOptionClick('random')}>Random Question</button>
+      <button className="vending-button" onClick={() => handleOptionClick('practice-test')}>Practice Test</button>
+      <button className="vending-button" onClick={() => handleOptionClick('practice-worst')}>Practice Worst</button>
     </div>
   );
 }
