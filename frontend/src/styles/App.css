@@ -139,6 +139,10 @@
   padding: 20px;
 }
 
+.app-title-link {
+  text-decoration: none; /* Remove underline from link */
+}
+
 .app-title {
   font-family: 'Kaushan Script', cursive;
   font-size: 4rem;
