@@ -39,7 +39,7 @@ export const fetchPerformanceData = (userId, setPerformanceData) => {
         .catch(error => console.error('Error fetching performance data:', error));
 };
 
-export const fetchRandomQuestion = (setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation) => {
+export const fetchRandomQuestion = (setQuestions) => {
     console.log('Fetching random question...');
     fetch(`${process.env.REACT_APP_API_URL}/api/question/random`)
         .then(response => {
@@ -51,11 +51,26 @@ export const fetchRandomQuestion = (setQuestion, setCurrentQuestionId, setSelect
         })
         .then(data => {
             console.log('Random question data:', data);
-            setQuestion(data);
-            setCurrentQuestionId(data.id);
-            setSelectedAnswers([]);
-            setFeedback(null);
-            setExplanation(null);
+            setQuestions([data]); // Wrap the question in an array
         })
         .catch(error => console.error('Error fetching question:', error));
 };
+
+export const fetchWorstQuestions = (userId, setWorstQuestions) => {
+    console.log(`Fetching worst questions for userId: ${userId}`);
+    fetch(`${process.env.REACT_APP_API_URL}/api/worst-questions?userId=${userId}`)
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Fetched worst questions:', data);
+            setWorstQuestions(data);
+        })
+        .catch(error => console.error('Error fetching worst questions:', error));
+};
+
+
