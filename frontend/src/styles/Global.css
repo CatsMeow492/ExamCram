@@ -1,0 +1,58 @@
+/* Color Palette */
+:root {
+  --primary-color: #ff69b4; /* Bright pink */
+  --secondary-color: #ff1493; /* Darker pink */
+  --background-color: #1a1a1a; /* Dark background */
+  --text-color: black; /* White text */
+  --border-color: #000000; /* Black border */
+  --shadow-color: rgba(0, 0, 0, 0.1); /* Shadow color */
+}
+
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Kaushan Script', cursive;
+  color: var(--primary-color);
+}
+
+button {
+  font-family: 'Roboto Mono', monospace;
+  background-color: var(--primary-color);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-color);
+  padding: 10px 20px;
+  cursor: pointer;
+  box-shadow: 0 4px var(--shadow-color);
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+  box-shadow: 0 6px var(--shadow-color);
+}
+
+button:active {
+  background-color: var(--secondary-color);
+  box-shadow: 0 2px var(--shadow-color);
+  transform: translateY(2px);
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.5);
+}
+
+/* Question Options */
+.question-option {
+  font-family: 'Roboto Mono', monospace;
+  color: var(--text-color);
+}
