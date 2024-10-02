@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom'; // Import Link
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './styles/App.css';
 import PerformanceMetrics from './components/PerformanceMetrics';
@@ -164,7 +164,13 @@ function App() {
       <Router>
         <div className="App">
           <header className="App-header">
-            <h1 className="app-title">{user ? "Exam Cram" : "Welcome"}</h1>
+            {user ? (
+              <Link to="/study-options" className="app-title-link">
+                <h1 className="app-title">Exam Cram</h1>
+              </Link>
+            ) : (
+              <h1 className="app-title">Welcome</h1>
+            )}
             <h4 className="app-subtitle">When the night before wasn't enough..</h4>
             {!user ? (
               <Login setUser={setUser} setUserId={setUserId} />
