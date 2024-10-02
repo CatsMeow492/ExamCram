@@ -1,0 +1,37 @@
+.study-options {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.study-options h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.study-button {
+  background-color: #6200ea;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  margin: 10px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.study-button:hover {
+  background-color: #3700b3;
+  transform: translateY(-2px);
+}
+
+.study-button:active {
+  background-color: #6200ea;
+  transform: translateY(0);
+}
+
+.study-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.5);
+}

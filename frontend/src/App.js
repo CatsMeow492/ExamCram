@@ -9,6 +9,7 @@ import useFetchPerformanceData from './hooks/useFetchPerformanceData';
 import useFetchRandomQuestion from './hooks/useFetchRandomQuestion';
 import { handleAnswerSelect, handleSubmitAnswer, handleExplain, handleHint } from './utils/handlers';
 import { jwtDecode } from 'jwt-decode';
+import './styles/App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
