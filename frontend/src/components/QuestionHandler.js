@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import QuestionCard from './QuestionCard';
 import useFetchRandomQuestion from '../hooks/useFetchRandomQuestion';
-import useFetchPracticeTestQuestions from '../hooks/useFetchWorstQuestions';
+import useFetchPracticeTestQuestions from '../hooks/useFetchPracticeTestQuestions';
 import useFetchWorstQuestions from '../hooks/useFetchWorstQuestions';
 import { handleAnswerSelect, handleSubmitAnswer, handleExplain, handleHint } from '../utils/handlers';
 
 function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData }) {
-  const [question, setQuestion] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const [explanation, setExplanation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [currentQuestionId, setCurrentQuestionId] = useState(null);
 
-  const fetchRandomQuestionCallback = useFetchRandomQuestion(setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation);
-  const fetchPracticeTestQuestionsCallback = useFetchPracticeTestQuestions(setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation);
-  const fetchWorstQuestionsCallback = useFetchWorstQuestions(setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation);
+  const fetchRandomQuestionCallback = useFetchRandomQuestion(setQuestions);
+  const fetchPracticeTestQuestionsCallback = useFetchPracticeTestQuestions(setQuestions);
+  const fetchWorstQuestionsCallback = useFetchWorstQuestions(userId, setQuestions);
 
   useEffect(() => {
     const studyOption = window.location.pathname.split('/').pop();
@@ -34,20 +34,29 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData }) {
     }
   }, [fetchRandomQuestionCallback, fetchPracticeTestQuestionsCallback, fetchWorstQuestionsCallback]);
 
+  const currentQuestion = questions[currentQuestionIndex];
+
+  const handleNextQuestion = () => {
+    setCurrentQuestionIndex((prevIndex) => (prevIndex + 1) % questions.length);
+    setSelectedAnswers([]);
+    setFeedback(null);
+    setExplanation(null);
+  };
+
   return (
     <>
-      {question ? (
+      {currentQuestion ? (
         <QuestionCard
-          question={question}
+          question={currentQuestion}
           selectedAnswers={selectedAnswers}
           handleAnswerSelect={(option) => handleAnswerSelect(option, selectedAnswers, setSelectedAnswers)}
-          handleSubmitAnswer={() => handleSubmitAnswer(selectedAnswers, question, setFeedback, updateUserMetrics, updatePerformanceData, currentQuestionId)}
+          handleSubmitAnswer={() => handleSubmitAnswer(selectedAnswers, currentQuestion, setFeedback, updateUserMetrics, updatePerformanceData, currentQuestion.id)}
           feedback={feedback}
-          handleExplain={() => handleExplain(selectedAnswers, question, setLoading, setExplanation)}
-          handleHint={() => handleHint(question, setLoading, setExplanation)}
+          handleExplain={() => handleExplain(selectedAnswers, currentQuestion, setLoading, setExplanation)}
+          handleHint={() => handleHint(currentQuestion, setLoading, setExplanation)}
           loading={loading}
           explanation={explanation}
-          fetchRandomQuestion={fetchRandomQuestionCallback}
+          fetchRandomQuestion={handleNextQuestion}
         />
       ) : (
         <p>Loading...</p>
