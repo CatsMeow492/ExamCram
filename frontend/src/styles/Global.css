@@ -6,6 +6,7 @@
   --text-color: black; /* White text */
   --border-color: #000000; /* Black border */
   --shadow-color: rgba(0, 0, 0, 0.1); /* Shadow color */
+  --text-on-primary: white;
 }
 
 /* Global Styles */
