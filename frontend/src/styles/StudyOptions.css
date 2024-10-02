@@ -6,7 +6,7 @@
 .study-options h2 {
   font-size: 24px;
   margin-bottom: 20px;
-  color: var(--text-color); /* Use global text color */
+  color: var(--text-on-primary);
 }
 
 .vending-button {
@@ -36,4 +36,8 @@
 .vending-button:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.5);
+}
+
+.study-options-title h2 {
+  color: var(--text-on-primary);
 }
