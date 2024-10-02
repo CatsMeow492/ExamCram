@@ -1,5 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+
 .App {
   text-align: center;
+  background-color: #1a1a1a; /* Dark background color */
 }
 
 .App-header {
@@ -104,10 +108,47 @@
 .chart-container {
   display: flex;
   justify-content: space-between;
+  min-width: 350px;
   align-items: center;
   margin-top: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: white;
   padding: 20px;
+}
+
+.app-title {
+  font-family: 'Kaushan Script', cursive;
+  font-size: 4rem;
+  font-weight: 700; /* Increase font weight */
+  color: #ff4b2b;
+  text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c; /* Adjust text shadow */
+  letter-spacing: 0.05em; /* Add letter spacing */
+  animation: flicker 1.5s infinite alternate;
+  margin-bottom: 20px;
+}
+
+.app-subtitle {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 1.5rem;
+  color: #ff4b2b;
+  text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
+  letter-spacing: 0.05em;
+  animation: flicker 1.5s infinite alternate;
+  margin-bottom: 20px;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+    text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
+  }
+  50% {
+    opacity: 0.8;
+    text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
+  }
 }
