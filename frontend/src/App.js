@@ -8,12 +8,7 @@ import QuestionHandler from './components/QuestionHandler';
 import Login from './components/Login';
 import useFetchUserMetrics from './hooks/useFetchUserMetrics';
 import useFetchPerformanceData from './hooks/useFetchPerformanceData';
-import useFetchRandomQuestion from './hooks/useFetchRandomQuestion';
-import { handleAnswerSelect, handleSubmitAnswer, handleExplain, handleHint } from './utils/handlers';
-import { jwtDecode } from 'jwt-decode';
 import './styles/App.css';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 function App() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
@@ -169,7 +164,8 @@ function App() {
       <Router>
         <div className="App">
           <header className="App-header">
-            <h1>{user ? "Exam Cram" : "Welcome"}</h1>
+            <h1 className="app-title">{user ? "Exam Cram" : "Welcome"}</h1>
+            <h4 className="app-subtitle">When the night before wasn't enough..</h4>
             {!user ? (
               <Login setUser={setUser} setUserId={setUserId} />
             ) : (
