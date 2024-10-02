@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import './styles/App.css';
-import QuestionCard from './components/QuestionCard';
 import PerformanceMetrics from './components/PerformanceMetrics';
+import StudyOptions from './components/StudyOptions';
+import QuestionHandler from './components/QuestionHandler';
+import Login from './components/Login';
 import useFetchUserMetrics from './hooks/useFetchUserMetrics';
 import useFetchPerformanceData from './hooks/useFetchPerformanceData';
 import useFetchRandomQuestion from './hooks/useFetchRandomQuestion';
@@ -14,36 +16,28 @@ import './styles/App.css';
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 function App() {
-  const [question, setQuestion] = useState(null);
-  const [selectedAnswers, setSelectedAnswers] = useState([]);
-  const [feedback, setFeedback] = useState(null);
-  const [explanation, setExplanation] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [performanceData, setPerformanceData] = useState([]);
   const [showCharts, setShowCharts] = useState(false);
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState('guest');
-  const [currentQuestionId, setCurrentQuestionId] = useState(null); 
 
   const fetchUserMetricsCallback = useFetchUserMetrics(userId, setCorrectAnswers, setIncorrectAnswers);
   const fetchPerformanceDataCallback = useFetchPerformanceData(userId, setPerformanceData);
-  const fetchRandomQuestionCallback = useFetchRandomQuestion(setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation);
 
   useEffect(() => {
     if (user && user.sub) {
-      setUserId(user.sub); 
+      setUserId(user.sub);
     }
   }, [user]);
 
   useEffect(() => {
     if (userId !== 'guest') {
-      fetchRandomQuestionCallback();
       fetchUserMetricsCallback();
       fetchPerformanceDataCallback();
     }
-  }, [userId, fetchUserMetricsCallback, fetchPerformanceDataCallback, fetchRandomQuestionCallback]); 
+  }, [userId, fetchUserMetricsCallback, fetchPerformanceDataCallback]);
 
   const getUserId = () => {
     return user ? user.sub : null;
@@ -132,7 +126,6 @@ function App() {
       .catch(error => console.error('Error updating performance data:', error));
   };
 
-  // Transform the API response into the expected format
   const transformedPerformanceData = Array.isArray(performanceData) ? performanceData.reduce((acc, item) => {
     acc[item.questionId] = {
       correct: item.correct,
@@ -171,78 +164,26 @@ function App() {
   const averageCorrect = totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
   const lightColor = totalAttempts < 20 || averageCorrect < 80 ? 'red' : 'green';
 
-  const handleLoginSuccess = (response) => {
-    console.log('Login Success:', response);
-    const idToken = response.credential;
-    const decodedToken = jwtDecode(idToken); 
-    console.log('Decoded Token:', decodedToken);
-
-    fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ idToken }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(() => {
-        setUser(decodedToken); 
-        setUserId(decodedToken.sub); 
-      })
-      .catch(error => {
-        console.error('Error during login:', error);
-      });
-  };
-
-  const handleLoginFailure = (response) => {
-    console.log('Login Failed:', response);
-  };
-
-  console.log('Google Client ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
-
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-      <div className="App">
-        <header className="App-header">
-          <h1>{user ? "Random Question" : "Exam Cram"}</h1>
-          <div className="light" style={{ backgroundColor: lightColor }} onClick={() => setShowCharts(!showCharts)}></div>
-          {!user ? (
-            <GoogleLogin
-              onSuccess={handleLoginSuccess}
-              onFailure={handleLoginFailure}
-              cookiePolicy={'single_host_origin'}
-              redirectUri="http://localhost:3000"
-            />
-          ) : (
-            <>
-              {question ? (
-                <QuestionCard
-                  question={question}
-                  selectedAnswers={selectedAnswers}
-                  handleAnswerSelect={(option) => handleAnswerSelect(option, selectedAnswers, setSelectedAnswers)}
-                  handleSubmitAnswer={() => handleSubmitAnswer(selectedAnswers, question, setFeedback, updateUserMetrics, updatePerformanceData, currentQuestionId)}
-                  feedback={feedback}
-                  handleExplain={() => handleExplain(selectedAnswers, question, setLoading, setExplanation)}
-                  handleHint={() => handleHint(question, setLoading, setExplanation)}
-                  loading={loading}
-                  explanation={explanation}
-                  fetchRandomQuestion={fetchRandomQuestionCallback}
-                />
-              ) : (
-                <p>Loading...</p>
-              )}
-              
-              {showCharts && <div className="chart-container"><PerformanceMetrics barData={barData} pieData={pieData} /></div>}
-              
-            </>
-          )}
-        </header>
-      </div>
+      <Router>
+        <div className="App">
+          <header className="App-header">
+            <h1>{user ? "Exam Cram" : "Welcome"}</h1>
+            {!user ? (
+              <Login setUser={setUser} setUserId={setUserId} />
+            ) : (
+              <Routes>
+                <Route path="/study/:option" element={<QuestionHandler userId={userId} updateUserMetrics={updateUserMetrics} updatePerformanceData={updatePerformanceData} />} />
+                <Route path="/study-options" element={<StudyOptions />} />
+                <Route path="*" element={<Navigate to="/study-options" />} />
+              </Routes>
+            )}
+            <div className="light" style={{ backgroundColor: lightColor }} onClick={() => setShowCharts(!showCharts)}></div>
+            {showCharts && <div className="chart-container"><PerformanceMetrics barData={barData} pieData={pieData} /></div>}
+          </header>
+        </div>
+      </Router>
     </GoogleOAuthProvider>
   );
 }

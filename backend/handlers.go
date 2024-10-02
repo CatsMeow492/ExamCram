@@ -1,12 +1,15 @@
 package main
 
 import (
+	"backend/helpers"
+	"backend/types" // Import the types package
 	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -32,7 +35,7 @@ func GetRandomQuestionHandler(w http.ResponseWriter, r *http.Request) {
 
 func ExplainHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request to /explain")
-	var req ExplainRequest
+	var req types.ExplainRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("Error decoding request body:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -102,7 +105,7 @@ func GetUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var metrics UserMetrics
+	var metrics types.UserMetrics
 	err = dynamodbattribute.UnmarshalMap(result.Item, &metrics)
 	if err != nil {
 		log.Println("Error unmarshalling item:", err)
@@ -115,7 +118,7 @@ func GetUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	var metrics UserMetrics
+	var metrics types.UserMetrics
 
 	if err := json.NewDecoder(r.Body).Decode(&metrics); err != nil {
 		log.Println("Error decoding request body:", err)
@@ -145,7 +148,7 @@ func UpdateUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var currentMetrics UserMetrics
+	var currentMetrics types.UserMetrics
 	if result.Item != nil {
 		err = dynamodbattribute.UnmarshalMap(result.Item, &currentMetrics)
 		if err != nil {
@@ -198,7 +201,7 @@ func UpdateUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
-	var performanceData QuestionPerformance
+	var performanceData types.QuestionPerformance
 
 	// Decode the request body
 	err := json.NewDecoder(r.Body).Decode(&performanceData)
@@ -305,7 +308,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	name := payload.Claims["name"].(string)
 	picture := payload.Claims["picture"].(string)
 
-	user := User{
+	user := types.User{
 		UserID:  userID,
 		Email:   email,
 		Name:    name,
@@ -381,7 +384,7 @@ func GetPerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var performanceData []QuestionPerformance
+	var performanceData []types.QuestionPerformance
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &performanceData)
 	if err != nil {
 		log.Println("Error unmarshalling query result:", err)
@@ -401,7 +404,7 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 
 func HintHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request to /hint")
-	var req HintRequest
+	var req types.HintRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("Error decoding request body:", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -441,5 +444,53 @@ func HintHandler(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Println("Error encoding response:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func GetWorstQuestionsHandler(w http.ResponseWriter, r *http.Request) {
+	userId := r.URL.Query().Get("userId")
+	if userId == "" {
+		http.Error(w, "userId is required", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Fetching performance data for userId: %s", userId)
+
+	// Fetch performance data for the user
+	performanceData, err := helpers.FetchPerformanceData(userId)
+	if err != nil {
+		log.Printf("Error fetching performance data: %v", err)
+		http.Error(w, "Error fetching performance data", http.StatusInternalServerError)
+		return
+	}
+
+	// Sort questions by the number of incorrect answers
+	sort.Slice(performanceData, func(i, j int) bool {
+		return performanceData[i].Incorrect > performanceData[j].Incorrect
+	})
+
+	// Select the top N worst questions
+	const topN = 10
+	if len(performanceData) > topN {
+		performanceData = performanceData[:topN]
+	}
+
+	// Fetch the question details for the worst questions
+	worstQuestions := make([]types.Question, len(performanceData)) // Change Question to types.Question
+	for i, data := range performanceData {
+		log.Printf("Fetching question details for questionId: %s", data.QuestionId)
+		question, err := helpers.FetchQuestionById(data.QuestionId)
+		if err != nil {
+			log.Printf("Error fetching question details for questionId %s: %v", data.QuestionId, err)
+			http.Error(w, "Error fetching question details", http.StatusInternalServerError)
+			return
+		}
+		worstQuestions[i] = question
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(worstQuestions); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Error encoding response", http.StatusInternalServerError)
 	}
 }

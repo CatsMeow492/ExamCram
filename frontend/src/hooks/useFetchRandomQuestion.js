@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { fetchRandomQuestion } from '../api/data';
 
-const useFetchRandomQuestion = (setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation) => {
+const useFetchRandomQuestion = (setQuestions) => {
   return useCallback(() => {
-    fetchRandomQuestion(setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation);
-  }, [setQuestion, setCurrentQuestionId, setSelectedAnswers, setFeedback, setExplanation]);
+    fetchRandomQuestion(setQuestions);
+  }, [setQuestions]);
 };
 
 export default useFetchRandomQuestion;

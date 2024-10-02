@@ -53,7 +53,7 @@ func main() {
 	}
 
 	svc = initAWS()
-	loadQuestions(svc)
+	loadQuestions(svc) // Load questions from DynamoDB
 
 	r := mux.NewRouter()
 	r.Use(corsMiddleware) // Apply CORS middleware globally
@@ -68,6 +68,7 @@ func main() {
 	r.HandleFunc("/api/login", LoginHandler).Methods("POST", "OPTIONS")
 	r.HandleFunc("/api/health", HealthCheckHandler).Methods("GET")
 	r.HandleFunc("/api/hint", HintHandler).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/worst-questions", GetWorstQuestionsHandler).Methods("GET", "OPTIONS")
 
 	log.Println("Server is running on port 8080")
 	http.ListenAndServe(":8080", r)

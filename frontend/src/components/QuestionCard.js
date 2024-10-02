@@ -4,6 +4,10 @@ import ReactMarkdown from 'react-markdown'; // Import react-markdown
 import '../styles/QuestionCard.css';
 
 const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, handleHint }) => {
+  if (!question || !question.options) {
+    return <p>Loading...</p>; // Display a loading message or spinner
+  }
+
   return (
     <div className="card">
       <div className="card-header">
@@ -36,22 +40,8 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
 };
 
 QuestionCard.propTypes = {
-  question: PropTypes.shape({
-    question: PropTypes.string.isRequired,
-    options: PropTypes.arrayOf(
-      PropTypes.shape({
-        text: PropTypes.string.isRequired,
-        correct: PropTypes.bool.isRequired,
-      })
-    ).isRequired,
-    imageUrl: PropTypes.string, // Add this line to propTypes
-  }).isRequired,
-  selectedAnswers: PropTypes.arrayOf(
-    PropTypes.shape({
-      text: PropTypes.string.isRequired,
-      correct: PropTypes.bool.isRequired,
-    })
-  ).isRequired,
+  question: PropTypes.object,
+  selectedAnswers: PropTypes.array.isRequired,
   handleAnswerSelect: PropTypes.func.isRequired,
   handleSubmitAnswer: PropTypes.func.isRequired,
   feedback: PropTypes.string,
@@ -59,7 +49,7 @@ QuestionCard.propTypes = {
   loading: PropTypes.bool.isRequired,
   explanation: PropTypes.string,
   fetchRandomQuestion: PropTypes.func.isRequired,
-  handleHint: PropTypes.func.isRequired, // Added handleHint to propTypes
+  handleHint: PropTypes.func.isRequired,
 };
 
 export default QuestionCard;

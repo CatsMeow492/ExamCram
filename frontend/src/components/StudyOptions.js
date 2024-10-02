@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './StudyOptions.css'; // Import the CSS file
 
 function StudyOptions() {
   const navigate = useNavigate();
