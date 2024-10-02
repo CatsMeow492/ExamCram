@@ -3,3 +3,27 @@
   height: auto;
   margin-top: 10px;
 }
+
+.card-header h2 {
+  font-family: 'Roboto Mono', monospace; /* Use global font */
+  color: var(--text-color); /* Use global text color */
+}
+
+.option {
+  font-family: 'Roboto Mono', monospace; /* Use global font */
+  color: var(--text-color); /* Use global text color */
+  background: #f9f9f9;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.option:hover {
+  background: #e0e0e0;
+}
+
+.option.selected {
+  background: #d0d0d0; /* Change this to the desired highlight color */
+}
