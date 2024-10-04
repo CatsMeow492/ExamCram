@@ -21,6 +21,7 @@ function App() {
 
   const fetchUserMetricsCallback = useFetchUserMetrics(userId, setCorrectAnswers, setIncorrectAnswers);
   const fetchPerformanceDataCallback = useFetchPerformanceData(userId, setPerformanceData);
+  console.log('Performance data in App:', performanceData);
 
   useEffect(() => {
     if (user && user.sub) {
@@ -158,7 +159,7 @@ function App() {
 
   const totalAttempts = correctAnswers + incorrectAnswers;
   const averageCorrect = totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
-  const lightColor = totalAttempts < 20 || averageCorrect < 80 ? 'red' : 'green';
+  const lightColor = totalAttempts < 20 || averageCorrect < 80 ? {firstColor: '#171717', secondColor: '#4e4e4e', thirdColor: '#171717'} : {firstColor: '#171717', secondColor: '#4e4e4e', thirdColor: '#171717'};
 
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
@@ -177,7 +178,7 @@ function App() {
               <Login setUser={setUser} setUserId={setUserId} />
             ) : (
               <Routes>
-                <Route path="/study/:option" element={<QuestionHandler userId={userId} updateUserMetrics={updateUserMetrics} updatePerformanceData={updatePerformanceData} />} />
+                <Route path="/study/:option" element={<QuestionHandler userId={userId} updateUserMetrics={updateUserMetrics} updatePerformanceData={updatePerformanceData} performanceData={performanceData} />} />
                 <Route path="/study-options" element={<StudyOptions />} />
                 <Route path="*" element={<Navigate to="/study-options" />} />
               </Routes>
