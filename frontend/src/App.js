@@ -183,7 +183,7 @@ function App() {
               </Routes>
             )}
             <div className="lantern-container" onClick={() => setShowCharts(!showCharts)} >
-              <Lantern />
+              <Lantern lightColor={lightColor} />
             </div>
             
             {showCharts && <div className="chart-container"><PerformanceMetrics barData={barData} pieData={pieData} /></div>}
