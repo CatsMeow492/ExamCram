@@ -3,10 +3,16 @@ import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown'; // Import react-markdown
 import '../styles/QuestionCard.css';
 
-const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, handleHint }) => {
+const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, handleHint, performanceMetrics, studyMode }) => {
   if (!question || !question.options) {
     return <p>Loading...</p>; // Display a loading message or spinner
   }
+
+  console.log('Performance metrics in QuestionCard:', performanceMetrics);
+  console.log('Question in QuestionCard:', question);
+  console.log('Study mode in QuestionCard:', studyMode);
+  // Find the performance metrics for the current question
+  const currentQuestionMetrics = performanceMetrics.find(metric => metric.questionId === question.id) || { correct: 0, incorrect: 0 };
 
   return (
     <div className="card">
@@ -14,6 +20,11 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
         <h2>{question.question}</h2>
         {question.imageUrl && <img src={question.imageUrl} alt="Question" className="question-image" />}
       </div>
+      {studyMode === 'practice-worst' && performanceMetrics && (
+        <div className="performance-metrics">
+          <p>Correct: {currentQuestionMetrics.correct} | Incorrect: {currentQuestionMetrics.incorrect}</p>
+        </div>
+      )}
       <ul>
         {question.options.map((option, idx) => (
           <li
@@ -50,6 +61,13 @@ QuestionCard.propTypes = {
   explanation: PropTypes.string,
   fetchRandomQuestion: PropTypes.func.isRequired,
   handleHint: PropTypes.func.isRequired,
+  performanceMetrics: PropTypes.arrayOf(PropTypes.shape({ // Update prop type for performance metrics
+    correct: PropTypes.number,
+    incorrect: PropTypes.number,
+    questionId: PropTypes.string,
+    userId: PropTypes.string,
+  })),
+  studyMode: PropTypes.string.isRequired, // Add studyMode prop type
 };
 
 export default QuestionCard;

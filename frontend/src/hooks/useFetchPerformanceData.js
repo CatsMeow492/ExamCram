@@ -3,7 +3,15 @@ import { fetchPerformanceData } from '../api/data';
 
 const useFetchPerformanceData = (userId, setPerformanceData) => {
   return useCallback(() => {
-    fetchPerformanceData(userId, setPerformanceData);
+    const fetchData = async () => {
+      try {
+        await fetchPerformanceData(userId, setPerformanceData);
+        console.log('Performance data fetched');
+      } catch (error) {
+        console.error('Error fetching performance data:', error);
+      }
+    };
+    fetchData();
   }, [userId, setPerformanceData]);
 };
 
