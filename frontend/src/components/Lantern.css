@@ -1,66 +1,66 @@
 .lanternContainer {
   position: fixed; /* Use fixed to keep it at the top right even when scrolling */
-  top: 10px; /* Position from the top */
-  right: 10px; /* Position from the right */
-  height: 216px; /* Reduced size */
-  width: 146px; /* Reduced size */
+  top: 20px; /* Increase top position to avoid collision */
+  right: 20px; /* Increase right position for better spacing */
+  height: 108px; /* Further reduced size */
+  width: 73px; /* Further reduced size */
   animation: bob 3s infinite;
   background-color: transparent; /* Ensure no background color */
   /* Remove overflow: hidden; */
 }
 
 .lanternContainer:hover .Lantern {
-  transform: scale(1.3); /* Scale up to 1.3 times on hover */
+  transform: scale(1.2); /* Slightly smaller scale on hover */
   transition: transform 0.3s ease; /* Smooth transition for scaling */
 }
 
 .Lantern {
   position: relative;
-  height: 216px; /* Reduced size */
-  width: 146px; /* Reduced size */
+  height: 108px; /* Further reduced size */
+  width: 73px; /* Further reduced size */
   margin: 0;
   animation: sway 4s infinite;
   transition: transform 0.3s ease; /* Ensure transition is applied */
 }
 
 .Lantern:hover {
-  transform: scale(1.3); /* Scale up to 1.3 times on hover */
+  transform: scale(1.2); /* Scale up to 1.2 times on hover */
 }
 
 .Glow {
-  height: 134px; /* Reduced size */
-  width: 100px; /* Reduced size */
+  height: 67px; /* Further reduced size */
+  width: 50px; /* Further reduced size */
   position: absolute;
-  top: 44px; /* Adjusted for scaling */
+  top: 22px; /* Adjusted for scaling */
   left: 50%; /* Center horizontally */
   transform: translateX(-50%);
-  box-shadow: 0 0 200px #efc259; /* Adjusted for scaling */
+  box-shadow: 0 0 100px #efc259; /* Adjusted for scaling */
   animation: flicker 0.2s infinite;
 }
 
 .Bottom {
   fill: url(#bottomGradient);
   position: absolute;
-  width: 94px; /* Reduced size */
-  height: 30px; /* Reduced size */
+  width: 47px; /* Further reduced size */
+  height: 15px; /* Further reduced size */
   bottom: 0px;
-  left: 26px; /* Adjusted for scaling */
+  left: 13px; /* Adjusted for scaling */
 }
 
 .Top {
   fill: url(#topGradient);
   position: absolute;
-  width: 94px; /* Reduced size */
-  height: 30px; /* Reduced size */
-  left: 26px; /* Adjusted for scaling */
+  width: 47px; /* Further reduced size */
+  height: 15px; /* Further reduced size */
+  left: 13px; /* Adjusted for scaling */
 }
 
 .lanternMain {
   fill: url(#lanternGradient);
   position: absolute;
-  width: 146px; /* Reduced size */
-  height: 160px; /* Reduced size */
-  top: 28px; /* Adjusted for scaling */
+  width: 73px; /* Further reduced size */
+  height: 80px; /* Further reduced size */
+  top: 14px; /* Adjusted for scaling */
   left: 0;
   transform-origin: center; /* Ensure scaling is centered */
   transform: scale(1); /* No scaling needed as it's already 3x */
@@ -70,9 +70,9 @@
   opacity: 0.4;
   fill: url(#Ridges);
   position: absolute;
-  width: 146px; /* Reduced size */
-  height: 160px; /* Reduced size */
-  top: 28px; /* Adjusted for scaling */
+  width: 73px; /* Further reduced size */
+  height: 80px; /* Further reduced size */
+  top: 14px; /* Adjusted for scaling */
   left: 0;
   transform-origin: center; /* Ensure scaling is centered */
   transform: scale(1); /* No scaling needed as it's already 3x */
@@ -81,26 +81,26 @@
 .leftSeam, .middleSeam, .rightSeam {
   opacity: 0.35;
   position: absolute;
-  height: 160px; /* Reduced size */
-  top: 28px; /* Adjusted for scaling */
+  height: 80px; /* Further reduced size */
+  top: 14px; /* Adjusted for scaling */
 }
 
 .leftSeam {
   fill: rgba(166, 0, 0, 1);
-  width: 20px; /* Reduced size */
-  left: 16px; /* Adjusted for scaling */
+  width: 10px; /* Further reduced size */
+  left: 8px; /* Adjusted for scaling */
 }
 
 .middleSeam {
   fill: rgba(155, 0, 0, 1);
-  width: 6px; /* Reduced size */
-  left: 66px; /* Adjusted for scaling */
+  width: 3px; /* Further reduced size */
+  left: 33px; /* Adjusted for scaling */
 }
 
 .rightSeam {
   fill: rgba(166, 0, 0, 1);
-  width: 20px; /* Reduced size */
-  right: 16px; /* Adjusted for scaling */
+  width: 10px; /* Further reduced size */
+  right: 8px; /* Adjusted for scaling */
 }
 
 @keyframes flicker {
@@ -114,7 +114,53 @@
 }
 
 @keyframes bob {
-  0% { top: 14px; } /* Adjusted for scaling */
-   50% { top: 34px; } /* Adjusted for scaling */
-  100% { top: 14px; } /* Adjusted for scaling */
+  0% { top: 7px; } /* Adjusted for scaling */
+  50% { top: 17px; } /* Adjusted for scaling */
+  100% { top: 7px; } /* Adjusted for scaling */
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+  .lanternContainer {
+    height: 72px;
+    width: 49px;
+  }
+
+  .Lantern {
+    height: 72px;
+    width: 49px;
+  }
+
+  .Glow {
+    height: 44px;
+    width: 33px;
+    top: 15px;
+  }
+
+  .Bottom, .Top {
+    width: 31px;
+    height: 10px;
+    left: 9px;
+  }
+
+  .lanternMain, .Ridges {
+    width: 49px;
+    height: 53px;
+    top: 13px;
+  }
+
+  .leftSeam {
+    width: 7px;
+    left: 6px;
+  }
+
+  .middleSeam {
+    width: 2px;
+    left: 22px;
+  }
+
+  .rightSeam {
+    width: 7px;
+    right: 6px;
+  }
 }
