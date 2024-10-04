@@ -171,7 +171,7 @@ function App() {
                 <h1 className="app-title">Exam Cram</h1>
               </Link>
             ) : (
-              <h1 className="app-title">Welcome</h1>
+              <h1 className="app-title">Exam Cram</h1>
             )}
             <h4 className="app-subtitle">When the night before wasn't enough..</h4>
             {!user ? (
