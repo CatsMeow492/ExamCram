@@ -1,166 +1,111 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Bar, Pie } from 'react-chartjs-2';
-import 'chart.js/auto'; // Ensure you have this import for Chart.js 3.x
-import '../styles/PerformanceMetrics.css'; // Import the CSS file
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import '../styles/PerformanceMetrics.css';
 
-const PerformanceMetrics = ({ barData, pieData }) => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+// Register the necessary components
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+const PerformanceMetrics = ({ barData, pieData, performanceData = [] }) => {
+  const [hoveredCell, setHoveredCell] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768); // Adjust this breakpoint as needed
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Calculate the percentage of incorrect answers for each question
-  const totalAttemptsPerQuestion = barData.datasets[0].data.map((value, index) => {
-    const correct = barData.datasets[1]?.data[index] || 0;
-    return value + correct;
-  });
+  // Prepare data for the heatmap
+  const maxSquaresPerRow = isMobile ? 8 : 15;
+  const data = [];
 
-  const percentageData = barData.datasets[0].data.map((value, index) => {
-    const totalAttempts = totalAttemptsPerQuestion[index];
-    return totalAttempts > 0 ? (value / totalAttempts) * 100 : 0;
-  });
+  for (let i = 0; i < Math.ceil(performanceData.length / maxSquaresPerRow); i++) {
+    const row = performanceData.slice(i * maxSquaresPerRow, (i + 1) * maxSquaresPerRow).map(item => {
+      if (item.correct + item.incorrect === 0) return null; // Unattempted
+      return item.correct / (item.correct + item.incorrect);
+    });
+    data.push(row);
+  }
 
-  // Sort the data to get the top 10 questions answered incorrectly the most
-  const sortedData = percentageData
-    .map((value, index) => ({ value, index }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
-
-  const sortedBarData = {
-    ...barData,
-    datasets: [{
-      ...barData.datasets[0],
-      data: sortedData.map(item => item.value),
-      label: 'Incorrect',
-      backgroundColor: 'rgba(255, 99, 132, 0.2)',
-      borderColor: 'rgba(255, 99, 132, 1)',
-      borderWidth: 1,
-    }],
-    labels: sortedData.map(item => barData.labels[item.index]),
+  // Function to determine cell color
+  const getCellColor = (value) => {
+    if (value === null) return '#ccc';
+    // Red for 0%, Yellow for 50%, Green for 100%
+    const red = Math.round(255 * (1 - value));
+    const green = Math.round(255 * value);
+    return `rgb(${red}, ${green}, 0)`;
   };
 
-  const barOptions = {
-    responsive: true,
-    maintainAspectRatio: false, // Allow the chart to take up more space
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-        labels: {
-          color: '#333',
-          font: {
-            size: 14,
-            weight: 'bold',
-          },
-        },
-      },
-      tooltip: {
-        enabled: true,
-        backgroundColor: '#fff',
-        titleColor: '#333',
-        bodyColor: '#666',
-        borderColor: '#ddd',
-        borderWidth: 1,
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: '#333',
-          maxRotation: 90,
-          minRotation: 45,
-        },
-      },
-      y: {
-        grid: {
-          color: '#eee',
-        },
-        ticks: {
-          callback: function(value) {
-            return value + '%'; // Add percentage symbol to y-axis ticks
-          },
-          beginAtZero: true,
-          max: 100, // Set the maximum value to 100%
-        },
-      },
-    },
-  };
-
-  const pieOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    layout: {
-      padding: {
-        right: 100, // Add padding to the right to prevent legend cutoff
-      },
-    },
-    plugins: {
-      legend: {
-        display: true,
-        position: 'right',
-        labels: {
-          color: '#333',
-          font: {
-            size: 14,
-            weight: 'bold',
-          },
-          padding: 10, // Add padding between legend items
-        },
-      },
-      tooltip: {
-        enabled: true,
-        backgroundColor: '#fff',
-        titleColor: '#333',
-        bodyColor: '#666',
-        borderColor: '#ddd',
-        borderWidth: 1,
-      },
-    },
-  };
+  // Calculate summary metrics
+  const totalAttempts = performanceData.reduce((total, item) => total + item.correct + item.incorrect, 0);
+  const totalCorrect = performanceData.reduce((total, item) => total + item.correct, 0);
+  const totalIncorrect = performanceData.reduce((total, item) => total + item.incorrect, 0);
+  const percentageCorrect = totalAttempts > 0 ? (totalCorrect / totalAttempts) * 100 : 0;
+  const percentageIncorrect = totalAttempts > 0 ? (totalIncorrect / totalAttempts) * 100 : 0;
 
   return (
     <div className="performance-metrics">
-      <div className="chart-container">
-        {isMobile ? (
-          <table>
-            <thead>
-              <tr>
-                <th>Question</th>
-                <th>Correct %</th>
-                <th>Incorrect %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedData.map((item, index) => {
-                const correctPercentage = 100 - item.value;
-                return (
-                  <tr key={index}>
-                    <td>{barData.labels[item.index]}</td>
-                    <td>{correctPercentage.toFixed(2)}%</td>
-                    <td>{item.value.toFixed(2)}%</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        ) : (
-          <Bar data={sortedBarData} options={barOptions} />
-        )}
+      <h2 className="metrics-title">Performance Metrics</h2>
+      <p className="metrics-description">Track your progress and performance over time.</p>
+      <div className="heatmap-container">
+        <div className="custom-heatmap">
+          {data.map((row, rowIndex) => (
+            <div key={rowIndex} className="heatmap-row">
+              <div className="heatmap-cells">
+                {row.map((value, colIndex) => {
+                  const questionNumber = rowIndex * maxSquaresPerRow + colIndex + 1;
+                  return (
+                    <div
+                      key={colIndex}
+                      className="heatmap-cell"
+                      style={{
+                        backgroundColor: getCellColor(value),
+                      }}
+                      onMouseEnter={() => setHoveredCell({ rowIndex, colIndex })}
+                      onMouseLeave={() => setHoveredCell(null)}
+                    >
+                      {questionNumber}
+                      {hoveredCell && 
+                       hoveredCell.rowIndex === rowIndex && 
+                       hoveredCell.colIndex === colIndex && (
+                        <div className="cell-tooltip">
+                          <span>Q{questionNumber}: </span>
+                          <span>{value !== null ? `${(value * 100).toFixed(0)}%` : 'N/A'}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="chart-container">
-        <Pie data={pieData} options={pieOptions} />
+        <Pie data={pieData} options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right',
+            },
+          },
+        }} />
+      </div>
+      <div className="metrics-summary">
+        <p>Total Attempts: {totalAttempts}</p>
+        <p>Total Correct: {totalCorrect}</p>
+        <p>Total Incorrect: {totalIncorrect}</p>
+        <p>Percentage Correct: {percentageCorrect.toFixed(2)}%</p>
+        <p>Percentage Incorrect: {percentageIncorrect.toFixed(2)}%</p>
       </div>
     </div>
   );
@@ -169,6 +114,7 @@ const PerformanceMetrics = ({ barData, pieData }) => {
 PerformanceMetrics.propTypes = {
   barData: PropTypes.object.isRequired,
   pieData: PropTypes.object.isRequired,
+  performanceData: PropTypes.array,
 };
 
 export default PerformanceMetrics;

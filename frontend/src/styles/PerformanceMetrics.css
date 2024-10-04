@@ -8,9 +8,20 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   max-width: 750px;
-  @media (max-width: 768px) {
-    max-width: 100%;
-  }
+  width: 100%;
+}
+
+.metrics-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.metrics-description {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .chart-container {
@@ -20,6 +31,23 @@
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.chart-container:hover {
+  transform: translateY(-5px);
+}
+
+.pie-chart {
+  max-width: 100px;
+  max-height: 100px;
+  margin: 0 auto;
+}
+
+.metrics-summary {
+  text-align: center;
+  margin-top: 20px;
+  color: #333;
 }
 
 .table-container {
@@ -46,3 +74,135 @@ th {
 tr:nth-child(even) {
   background-color: #f9f9f9;
 }
+
+tr:hover {
+  background-color: #e0e0e0;
+  transition: background-color 0.3s ease;
+}
+
+.heatmap-container {
+  width: 100%;
+  overflow-x: auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+}
+
+#x-labels-list {
+  display: flex;
+  color: black; /* Ensure text is black */
+  font-size: calc(5px + 1vmin);
+}
+
+#x-labels-list > div {
+  flex: 0 0 auto;
+  text-align: center;
+  visibility: visible;
+}
+
+#x-labels-list > div:not(:first-child) {
+  margin-left: 4px;
+}
+
+#x-labels-list > div:nth-child(3) {
+  margin-left: 8px;
+}
+
+#x-labels-list > div:nth-child(6) {
+  margin-left: 12px;
+}
+
+#x-labels-list > div:nth-child(5),
+#x-labels-list > div:nth-child(6) {
+  margin-left: 4px;
+}
+#x-labels-list > div:nth-child(7) {
+  margin-left: 3px;
+}
+#x-labels-list > div:nth-child(8) {
+  margin-left: 7px;
+}
+#x-labels-list > div:nth-child(9),
+#x-labels-list > div:nth-child(10),
+#x-labels-list > div:nth-child(11) {
+  margin-left: 0; /* Reset margin */
+}
+
+#y-label {
+  color:black;
+  flex: 0 0 40px;
+  font-size: calc(5px + 1vmin);
+}
+
+.custom-heatmap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heatmap-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.y-label {
+  width: 50px;
+  text-align: right;
+  padding-right: 10px;
+  font-size: 12px;
+}
+
+.heatmap-cells {
+  display: flex;
+}
+
+.heatmap-cell {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff; /* Change to white for better contrast */
+  border: 1px solid #ccc;
+  margin: 1px;
+  transition: all 0.3s ease;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5); /* Add text shadow for better readability */
+}
+
+.cell-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* Remove these classes as they're no longer needed */
+.x-labels, .x-label, .y-label {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .heatmap-cell {
+    width: 30px;
+    height: 30px;
+    font-size: 10px;
+  }
+
+  .cell-tooltip {
+    font-size: 10px;
+  }
+}
+
