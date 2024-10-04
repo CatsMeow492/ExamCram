@@ -187,7 +187,7 @@ function App() {
               <Lantern lightColor={lightColor} />
             </div>
             
-            {showCharts && <div className="chart-container"><PerformanceMetrics barData={barData} pieData={pieData} /></div>}
+            {showCharts && <PerformanceMetrics barData={barData} pieData={pieData} performanceData={performanceData} />}
           </header>
         </div>
       </Router>
