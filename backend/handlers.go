@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -45,10 +46,20 @@ func ExplainHandler(w http.ResponseWriter, r *http.Request) {
 	// Initialize OpenAI client
 	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 
+	// Join the correct answers into a single string
+	correctAnswersStr := strings.Join(req.CorrectAnswers, ", ")
+
 	prompt := fmt.Sprintf(
-		"Question: %s\nAnswer: %s\nExplanation: Please explain the answer in a simple, intuitive, and easy-to-remember way. Limit your response to %d tokens.",
+		"Question: %s\nSelected Answer(s): %s\nCorrect Answer(s): %s\n"+
+			"Explanation: Please provide a comprehensive explanation that covers the following points:\n"+
+			"1. Why the correct answer(s) is/are correct.\n"+
+			"2. If the selected answer(s) is/are incorrect, explain why it's/they're wrong.\n"+
+			"3. Provide any additional context or information that helps understand the concept better.\n"+
+			"Please explain in a simple, intuitive, and easy-to-remember way. Limit your response to %d words.",
 		req.Question,
-		req.SelectedAnswer, maxTokens)
+		strings.Join(req.SelectedAnswers, ", "),
+		correctAnswersStr,
+		maxTokens)
 
 	resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
 		Model: openai.GPT4o,
