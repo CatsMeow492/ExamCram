@@ -8,6 +8,7 @@ import QuestionHandler from './components/QuestionHandler';
 import Login from './components/Login';
 import useFetchUserMetrics from './hooks/useFetchUserMetrics';
 import useFetchPerformanceData from './hooks/useFetchPerformanceData';
+import Lantern from './components/Lantern';
 import './styles/App.css';
 
 function App() {
@@ -181,7 +182,10 @@ function App() {
                 <Route path="*" element={<Navigate to="/study-options" />} />
               </Routes>
             )}
-            <div className="light" style={{ backgroundColor: lightColor }} onClick={() => setShowCharts(!showCharts)}></div>
+            <div className="lantern-container" onClick={() => setShowCharts(!showCharts)} >
+              <Lantern />
+            </div>
+            
             {showCharts && <div className="chart-container"><PerformanceMetrics barData={barData} pieData={pieData} /></div>}
           </header>
         </div>

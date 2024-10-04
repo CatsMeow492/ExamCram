@@ -80,38 +80,6 @@
   margin-top: 20px;
 }
 
-.light {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 40px; /* Increase size for a lantern effect */
-  height: 40px; /* Increase size for a lantern effect */
-  border-radius: 50%; /* Circular shape */
-  background-color: #ffcc00; /* Lantern-like color */
-  box-shadow: 0 0 10px rgba(255, 204, 0, 0.8), 0 0 20px rgba(255, 204, 0, 0.6); /* Glow effect */
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.light:hover {
-  transform: scale(1.1); /* Slightly enlarge on hover */
-  box-shadow: 0 0 15px rgba(255, 204, 0, 1), 0 0 30px rgba(255, 204, 0, 0.8); /* Enhance glow on hover */
-}
-
-/* Optional: Add a flickering animation to mimic a lantern */
-@keyframes flicker {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-.light {
-  animation: flicker 1.5s infinite alternate;
-}
-
 .toggle-charts-button {
   position: absolute;
   top: 10px;
@@ -164,17 +132,8 @@
   margin-bottom: 20px;
 }
 
-@keyframes flicker {
-  0% {
-    opacity: 1;
-    text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
-  }
-  50% {
-    opacity: 0.8;
-    text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
-  }
-  100% {
-    opacity: 1;
-    text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
-  }
+.lantern-container {
+  background-color: #1a1a1a;
 }
+
+
