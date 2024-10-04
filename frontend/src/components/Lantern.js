@@ -1,24 +1,24 @@
 import React from 'react';
 import './Lantern.css';
 
-const Lantern = () => {
+const Lantern = (firstColor, secondColor, thirdColor) => {
   return (
     <div className="lanternContainer">
       <div className="Lantern">
         <div className="Glow"></div>
         <svg className="Top" viewBox="0 0 140 45" preserveAspectRatio="none">
           <linearGradient id="topGradient" x1="0" x2="1" y1="0.4" y2="0.4">
-            <stop offset="0" stopColor="#171717"></stop>
-            <stop offset="0.7" stopColor="#4e4e4e"></stop>
-            <stop offset="1" stopColor="#171717"></stop>
+            <stop offset="0" stopColor={firstColor}></stop>
+            <stop offset="0.7" stopColor={secondColor}></stop>
+            <stop offset="1" stopColor={thirdColor}></stop>
           </linearGradient>
           <path d="M 10 0 C 10 0 38 -5 68 -5 C 98 -5 131 0 131 0 C 136 0 141 4 141 10 L 141 39 L 0 39 L 0 10 C 0 4 4 0 10 0 Z"></path>
         </svg>
         <svg className="Bottom" viewBox="0 0 140 45" preserveAspectRatio="none">
           <linearGradient id="bottomGradient" x1="0" x2="1" y1="0.4" y2="0.4">
-            <stop offset="0" stopColor="#171717"></stop>
-            <stop offset="0.7" stopColor="#4e4e4e"></stop>
-            <stop offset="1" stopColor="#171717"></stop>
+            <stop offset="0" stopColor={firstColor}></stop>
+            <stop offset="0.7" stopColor={secondColor}></stop>
+            <stop offset="1" stopColor={thirdColor}></stop>
           </linearGradient>
           <path d="M 0 0 L 141 0 L 141 29 C 141 34 136 39 131 39 C 131 39 98 43 68 43 C 38 43 10 39 10 39 C 4 39 0 35 0 29 L 0 0 Z"></path>
         </svg>
