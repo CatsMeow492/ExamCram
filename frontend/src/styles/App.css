@@ -136,4 +136,16 @@
   background-color: #1a1a1a;
 }
 
+/* Media query for mobile devices */
+@media (max-width: 600px) {
+  .app-title {
+    margin-top: 80px; /* Ensure at least 80px from the top */
+    margin-bottom: 10px; /* Reduce space between title and subtitle */
+  }
+
+  .app-subtitle {
+    margin-bottom: 20px; /* Adjust as needed */
+  }
+}
+
 

@@ -82,7 +82,7 @@
   opacity: 0.35;
   position: absolute;
   height: 80px; /* Further reduced size */
-  top: 14px; /* Adjusted for scaling */
+  top: 16px;
 }
 
 .leftSeam {
@@ -146,7 +146,11 @@
   .lanternMain, .Ridges {
     width: 49px;
     height: 53px;
-    top: 13px;
+    top: 10px;
+  }
+
+  .leftSeam, .middleSeam, .rightSeam {
+    top: 0px;
   }
 
   .leftSeam {
