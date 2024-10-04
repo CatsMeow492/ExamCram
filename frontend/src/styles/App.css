@@ -112,24 +112,34 @@
 }
 
 .app-title {
-  font-family: 'Kaushan Script', cursive;
+  font-family: 'Noto Serif JP', serif; /* Traditional Japanese font */
   font-size: 4rem;
-  font-weight: 700; /* Increase font weight */
-  color: #ff4b2b;
-  text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c; /* Adjust text shadow */
-  letter-spacing: 0.05em; /* Add letter spacing */
-  animation: flicker 1.5s infinite alternate;
+  font-weight: 400;
+  color: #d4af37; /* Softer gold color for a more subtle illumination */
+  text-shadow: 0 0 3px #d4af37, 0 0 6px #b8860b, 0 0 9px #8b4513; /* Softer glowing effect */
+  letter-spacing: 0.02em;
   margin-bottom: 20px;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+  padding: 10px 20px;
+  border: 2px solid #d4af37; /* Border to mimic sign frame */
+  border-radius: 5px;
+  display: inline-block;
+  animation: flicker 1.5s infinite alternate;
 }
 
 .app-subtitle {
-  font-family: 'Roboto Mono', monospace;
-  font-size: 1.5rem;
-  color: #ff4b2b;
-  text-shadow: 1px 1px 0 #ff4b2b, 2px 2px 0 #ff416c, 3px 3px 0 #ff4b2b, 4px 4px 0 #ff416c;
-  letter-spacing: 0.05em;
-  animation: flicker 1.5s infinite alternate;
+  font-family: 'Noto Sans JP', sans-serif; /* Traditional Japanese font */
+  font-size: 1.2rem;
+  color: #d4af37; /* Softer gold color for a more subtle illumination */
+  text-shadow: 0 0 3px #d4af37, 0 0 6px #b8860b, 0 0 9px #8b4513; /* Softer glowing effect */
+  letter-spacing: 0.02em;
   margin-bottom: 20px;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+  padding: 5px 15px;
+  border: 2px solid #d4af37; /* Border to mimic sign frame */
+  border-radius: 5px;
+  display: inline-block;
+  animation: flicker 1.5s infinite alternate;
 }
 
 .lantern-container {
@@ -146,6 +156,12 @@
   .app-subtitle {
     margin-bottom: 20px; /* Adjust as needed */
   }
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
 }
 
 

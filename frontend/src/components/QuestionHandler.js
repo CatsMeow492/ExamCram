@@ -11,7 +11,7 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
   const studyOption = location.state?.studyMode || 'random'; // Default to 'random' if not provided
 
   const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const [explanation, setExplanation] = useState(null);
@@ -39,7 +39,7 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
       default:
         fetchRandomQuestionCallback();
     }
-  }, [studyOption, fetchRandomQuestionCallback, fetchPracticeTestQuestionsCallback, fetchWorstQuestionsCallback]);
+  }, [studyOption, fetchRandomQuestionCallback, fetchPracticeTestQuestionsCallback, fetchWorstQuestionsCallback, performanceData, performanceMetrics]);
 
   useEffect(() => {
     // Fetch performance metrics for the current question
