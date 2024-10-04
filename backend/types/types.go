@@ -14,8 +14,9 @@ type Option struct {
 }
 
 type ExplainRequest struct {
-	Question       string `json:"question"`
-	SelectedAnswer string `json:"selectedAnswer"`
+	Question        string   `json:"question"`
+	SelectedAnswers []string `json:"selectedAnswers"`
+	CorrectAnswers  []string `json:"correctAnswers"`
 }
 
 type HintRequest struct {

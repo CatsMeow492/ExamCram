@@ -17,13 +17,14 @@ export const handleSubmitAnswer = (selectedAnswers, question, setFeedback, updat
     }
 };
 
-export const handleExplain = (selectedAnswers, question, setLoading, setExplanation) => {
+export const handleExplain = (selectedAnswers, question, setIsExplanationLoading, setExplanation, correctAnswer) => {
     if (selectedAnswers.length > 0) {
         const requestBody = {
             question: question.question,
             selectedAnswers: selectedAnswers.map(answer => answer.text),
+            correctAnswer: correctAnswer,
         };
-        setLoading(true);
+        setIsExplanationLoading(true);
         fetch(`${process.env.REACT_APP_API_URL}/api/explain`, {
             method: 'POST',
             headers: {
@@ -45,19 +46,19 @@ export const handleExplain = (selectedAnswers, question, setLoading, setExplanat
                 console.error('Error fetching explanation:', error);
             })
             .finally(() => {
-                setLoading(false);
+                setIsExplanationLoading(false);
             });
     } else {
         console.log('No selected answers to explain');
     }
 };
 
-export const handleHint = (question, setLoading, setExplanation) => {
-        const requestBody = {
-            question: question.question,
-        }
-        setLoading(true);
-        fetch(`${process.env.REACT_APP_API_URL}/api/hint`, {
+export const handleHint = (question, setHint, setIsHintLoading) => {
+    const requestBody = {
+        question: question.question,
+    };
+    setIsHintLoading(true);
+    fetch(`${process.env.REACT_APP_API_URL}/api/hint`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -72,12 +73,12 @@ export const handleHint = (question, setLoading, setExplanation) => {
             })
             .then(data => {
                 console.log('Hint:', data.hint);
-                setExplanation(data.hint);
+                setHint(data.hint);
             })
             .catch(error => {
                 console.error('Error fetching hint:', error);
             })
             .finally(() => {
-                setLoading(false);
+                setIsHintLoading(false);
             });
-    };
+};

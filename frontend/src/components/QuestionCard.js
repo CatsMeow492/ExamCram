@@ -3,7 +3,22 @@ import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown'; // Import react-markdown
 import '../styles/QuestionCard.css';
 
-const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSubmitAnswer, feedback, handleExplain, loading, explanation, fetchRandomQuestion, handleHint, performanceMetrics, studyMode }) => {
+const QuestionCard = ({ 
+  question, 
+  selectedAnswers, 
+  handleAnswerSelect, 
+  handleSubmitAnswer, 
+  feedback, 
+  handleExplain, 
+  isExplanationLoading, 
+  explanation, 
+  fetchRandomQuestion, 
+  handleHint, 
+  isHintLoading, 
+  hint, 
+  performanceMetrics, 
+  studyMode 
+}) => {
   if (!question || !question.options) {
     return <p>Loading...</p>; // Display a loading message or spinner
   }
@@ -37,15 +52,16 @@ const QuestionCard = ({ question, selectedAnswers, handleAnswerSelect, handleSub
         ))}
       </ul>
       <button onClick={handleSubmitAnswer}>Submit Answer</button>
-      <button onClick={handleExplain} disabled={loading}>
-        {loading ? 'Loading...' : 'Explain'}
+      <button onClick={handleExplain} disabled={isExplanationLoading}>
+        {isExplanationLoading ? 'Loading...' : 'Explain'}
       </button>
-      <button onClick={handleHint} disabled={loading}>
-        {loading ? 'Loading...' : 'Hint'}
+      <button onClick={handleHint} disabled={isHintLoading}>
+        {isHintLoading ? 'Loading...' : 'Hint'}
       </button>
       <button onClick={fetchRandomQuestion}>Next Question</button>
       {feedback && <p className="feedback">{feedback}</p>}
       {explanation && <ReactMarkdown className="explanation">{explanation}</ReactMarkdown>} {/* Render explanation as markdown */}
+      {hint && <ReactMarkdown className="hint">{hint}</ReactMarkdown>}
     </div>
   );
 };
@@ -57,16 +73,13 @@ QuestionCard.propTypes = {
   handleSubmitAnswer: PropTypes.func.isRequired,
   feedback: PropTypes.string,
   handleExplain: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
+  isExplanationLoading: PropTypes.bool.isRequired,
   explanation: PropTypes.string,
   fetchRandomQuestion: PropTypes.func.isRequired,
   handleHint: PropTypes.func.isRequired,
-  performanceMetrics: PropTypes.arrayOf(PropTypes.shape({ // Update prop type for performance metrics
-    correct: PropTypes.number,
-    incorrect: PropTypes.number,
-    questionId: PropTypes.string,
-    userId: PropTypes.string,
-  })),
+  isHintLoading: PropTypes.bool.isRequired,
+  hint: PropTypes.string,
+  performanceMetrics: PropTypes.array,
   studyMode: PropTypes.string.isRequired, // Add studyMode prop type
 };
 

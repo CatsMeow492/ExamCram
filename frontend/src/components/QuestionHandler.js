@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import QuestionCard from './QuestionCard';
 import useFetchRandomQuestion from '../hooks/useFetchRandomQuestion';
@@ -8,24 +8,27 @@ import { handleAnswerSelect, handleSubmitAnswer, handleExplain, handleHint } fro
 
 function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, performanceData }) {
   const location = useLocation();
-  const studyOption = location.state?.studyMode || 'random'; // Default to 'random' if not provided
+  const studyOption = location.state?.studyMode || 'random';
 
   const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const [explanation, setExplanation] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [hint, setHint] = useState(null);
   const [performanceMetrics, setPerformanceMetrics] = useState({});
+  
+  // Separate loading states
+  const [isQuestionLoading, setIsQuestionLoading] = useState(false);
+  const [isExplanationLoading, setIsExplanationLoading] = useState(false);
+  const [isHintLoading, setIsHintLoading] = useState(false);
 
   const fetchRandomQuestionCallback = useFetchRandomQuestion(setQuestions);
   const fetchPracticeTestQuestionsCallback = useFetchPracticeTestQuestions(setQuestions);
   const fetchWorstQuestionsCallback = useFetchWorstQuestions(userId, setQuestions);
-  console.log('Study option in QuestionHandler:', studyOption);
 
-  useEffect(() => {
-    setPerformanceMetrics(performanceData);
-    console.log('Performance metrics in QuestionHandler:', performanceMetrics);
+  const fetchQuestion = useCallback(() => {
+    setIsQuestionLoading(true);
     switch (studyOption) {
       case 'random':
         fetchRandomQuestionCallback();
@@ -39,10 +42,18 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
       default:
         fetchRandomQuestionCallback();
     }
-  }, [studyOption, fetchRandomQuestionCallback, fetchPracticeTestQuestionsCallback, fetchWorstQuestionsCallback, performanceData, performanceMetrics]);
+    setIsQuestionLoading(false);
+  }, [studyOption, fetchRandomQuestionCallback, fetchPracticeTestQuestionsCallback, fetchWorstQuestionsCallback]);
 
   useEffect(() => {
-    // Fetch performance metrics for the current question
+    fetchQuestion();
+  }, [fetchQuestion]);
+
+  useEffect(() => {
+    setPerformanceMetrics(performanceData);
+  }, [performanceData]);
+
+  useEffect(() => {
     if (questions.length > 0) {
       const currentQuestionId = questions[currentQuestionIndex]?.id;
       if (currentQuestionId) {
@@ -60,34 +71,55 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
     setSelectedAnswers([]);
     setFeedback(null);
     setExplanation(null);
-    switch (studyOption) {
-      case 'random':
-        fetchRandomQuestionCallback();
-        break;
-      case 'practice-test':
-        fetchPracticeTestQuestionsCallback();
-        break;
-      case 'practice-worst':
-        fetchWorstQuestionsCallback();
-        break;
-      default:
-        fetchRandomQuestionCallback();
+    setHint(null);
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    } else {
+      fetchQuestion();
     }
   };
+
+  const handleSubmitAnswerWrapper = () => {
+    handleSubmitAnswer(
+      selectedAnswers,
+      currentQuestion,
+      setFeedback,
+      updateUserMetrics,
+      updatePerformanceData,
+      currentQuestion?.id
+    );
+  };
+
+  const handleExplainWrapper = () => {
+    setIsExplanationLoading(true);
+    const correctAnswer = currentQuestion.options.find(option => option.correct).text;
+    handleExplain(selectedAnswers, currentQuestion, setIsExplanationLoading, setExplanation, correctAnswer);
+  };
+
+  const handleHintWrapper = () => {
+    setIsHintLoading(true);
+    handleHint(currentQuestion, setHint, setIsHintLoading);
+  };
+
+  if (isQuestionLoading) {
+    return <div>Loading question...</div>;
+  }
 
   return (
     <QuestionCard
       question={currentQuestion}
       selectedAnswers={selectedAnswers}
       handleAnswerSelect={(option) => handleAnswerSelect(option, selectedAnswers, setSelectedAnswers)}
-      handleSubmitAnswer={() => handleSubmitAnswer(selectedAnswers, currentQuestion, setFeedback, updateUserMetrics, updatePerformanceData, currentQuestion?.id)}
+      handleSubmitAnswer={handleSubmitAnswerWrapper}
       feedback={feedback}
-      handleExplain={() => handleExplain(selectedAnswers, currentQuestion, setLoading, setExplanation)}
-      loading={loading}
+      handleExplain={handleExplainWrapper}
+      isExplanationLoading={isExplanationLoading}
       explanation={explanation}
       fetchRandomQuestion={fetchNextQuestion}
-      handleHint={() => handleHint(currentQuestion)}
-      performanceMetrics={performanceMetrics} // Pass performance metrics to QuestionCard
+      handleHint={handleHintWrapper}
+      isHintLoading={isHintLoading}
+      hint={hint}
+      performanceMetrics={performanceMetrics}
       studyMode={studyOption}
     />
   );
