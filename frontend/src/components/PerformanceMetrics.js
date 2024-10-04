@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -7,13 +7,13 @@ import '../styles/PerformanceMetrics.css';
 // Register the necessary components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PerformanceMetrics = ({ barData, pieData, performanceData = [] }) => {
+const PerformanceMetrics = ({ performanceData = [] }) => {
   const [hoveredCell, setHoveredCell] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768); // Adjust this breakpoint as needed
+      setIsMobile(window.innerWidth <= 768);
     };
 
     checkMobile();
@@ -21,6 +21,26 @@ const PerformanceMetrics = ({ barData, pieData, performanceData = [] }) => {
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Calculate summary metrics and pie chart data
+  const { totalAttempts, totalCorrect, totalIncorrect, percentageCorrect, percentageIncorrect, pieChartData } = useMemo(() => {
+    const totalCorrect = performanceData.reduce((total, item) => total + item.correct, 0);
+    const totalIncorrect = performanceData.reduce((total, item) => total + item.incorrect, 0);
+    const totalAttempts = totalCorrect + totalIncorrect;
+    const percentageCorrect = totalAttempts > 0 ? (totalCorrect / totalAttempts) * 100 : 0;
+    const percentageIncorrect = totalAttempts > 0 ? (totalIncorrect / totalAttempts) * 100 : 0;
+
+    const pieChartData = {
+      labels: ['Correct', 'Incorrect'],
+      datasets: [{
+        data: [totalCorrect, totalIncorrect],
+        backgroundColor: ['#36A2EB', '#FF6384'],
+        hoverBackgroundColor: ['#36A2EB', '#FF6384']
+      }]
+    };
+
+    return { totalAttempts, totalCorrect, totalIncorrect, percentageCorrect, percentageIncorrect, pieChartData };
+  }, [performanceData]);
 
   // Prepare data for the heatmap
   const maxSquaresPerRow = isMobile ? 8 : 15;
@@ -42,13 +62,6 @@ const PerformanceMetrics = ({ barData, pieData, performanceData = [] }) => {
     const green = Math.round(255 * value);
     return `rgb(${red}, ${green}, 0)`;
   };
-
-  // Calculate summary metrics
-  const totalAttempts = performanceData.reduce((total, item) => total + item.correct + item.incorrect, 0);
-  const totalCorrect = performanceData.reduce((total, item) => total + item.correct, 0);
-  const totalIncorrect = performanceData.reduce((total, item) => total + item.incorrect, 0);
-  const percentageCorrect = totalAttempts > 0 ? (totalCorrect / totalAttempts) * 100 : 0;
-  const percentageIncorrect = totalAttempts > 0 ? (totalIncorrect / totalAttempts) * 100 : 0;
 
   return (
     <div className="performance-metrics">
@@ -89,7 +102,7 @@ const PerformanceMetrics = ({ barData, pieData, performanceData = [] }) => {
         </div>
       </div>
       <div className="chart-container">
-        <Pie data={pieData} options={{
+        <Pie data={pieChartData} options={{
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
@@ -112,8 +125,6 @@ const PerformanceMetrics = ({ barData, pieData, performanceData = [] }) => {
 };
 
 PerformanceMetrics.propTypes = {
-  barData: PropTypes.object.isRequired,
-  pieData: PropTypes.object.isRequired,
   performanceData: PropTypes.array,
 };
 

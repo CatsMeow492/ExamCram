@@ -123,40 +123,6 @@ function App() {
       .catch(error => console.error('Error updating performance data:', error));
   };
 
-  const transformedPerformanceData = Array.isArray(performanceData) ? performanceData.reduce((acc, item) => {
-    acc[item.questionId] = {
-      correct: item.correct,
-      incorrect: item.incorrect,
-    };
-    return acc;
-  }, {}) : {};
-
-  const barData = {
-    labels: Object.keys(transformedPerformanceData).map(questionId => questionId),
-    datasets: [
-      {
-        label: 'Correct',
-        backgroundColor: 'blue',
-        data: Object.values(transformedPerformanceData).map(d => d.correct || 0),
-      },
-      {
-        label: 'Incorrect',
-        backgroundColor: 'red',
-        data: Object.values(transformedPerformanceData).map(d => d.incorrect || 0),
-      },
-    ],
-  };
-
-  const pieData = {
-    labels: ['Correct', 'Incorrect'],
-    datasets: [
-      {
-        data: [correctAnswers, incorrectAnswers],
-        backgroundColor: ['blue', 'red'],
-      },
-    ],
-  };
-
   const totalAttempts = correctAnswers + incorrectAnswers;
   const averageCorrect = totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
   const lightColor = totalAttempts < 20 || averageCorrect < 80 ? {firstColor: '#171717', secondColor: '#4e4e4e', thirdColor: '#171717'} : {firstColor: '#171717', secondColor: '#4e4e4e', thirdColor: '#171717'};
@@ -187,7 +153,7 @@ function App() {
               <Lantern lightColor={lightColor} />
             </div>
             
-            {showCharts && <PerformanceMetrics barData={barData} pieData={pieData} performanceData={performanceData} />}
+            {showCharts && <PerformanceMetrics performanceData={performanceData} />}
           </header>
         </div>
       </Router>
