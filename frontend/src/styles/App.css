@@ -119,10 +119,7 @@
   text-shadow: 0 0 3px #d4af37, 0 0 6px #b8860b, 0 0 9px #8b4513; /* Softer glowing effect */
   letter-spacing: 0.02em;
   margin-bottom: 20px;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
   padding: 10px 20px;
-  border: 2px solid #d4af37; /* Border to mimic sign frame */
-  border-radius: 5px;
   display: inline-block;
   animation: flicker 1.5s infinite alternate;
 }
@@ -133,11 +130,8 @@
   color: #d4af37; /* Softer gold color for a more subtle illumination */
   text-shadow: 0 0 3px #d4af37, 0 0 6px #b8860b, 0 0 9px #8b4513; /* Softer glowing effect */
   letter-spacing: 0.02em;
-  margin-bottom: 20px;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
-  padding: 5px 15px;
-  border: 2px solid #d4af37; /* Border to mimic sign frame */
-  border-radius: 5px;
+  margin-top: -10px;
+  padding-bottom: 50px;
   display: inline-block;
   animation: flicker 1.5s infinite alternate;
 }
