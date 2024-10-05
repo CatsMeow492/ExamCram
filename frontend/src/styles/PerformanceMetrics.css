@@ -1,3 +1,5 @@
+@import './Global.css';
+
 .performance-metrics {
   display: flex;
   flex-direction: column;
@@ -14,6 +16,7 @@
   font-size: 24px;
   font-weight: bold;
   color: #333;
+  font-family: var(--font-secondary);
 }
 
 .metrics-description {
@@ -21,6 +24,7 @@
   color: #666;
   margin-bottom: 20px;
   text-align: center;
+  font-family: var(--font-secondary);
 }
 
 .chart-container {
@@ -47,6 +51,7 @@
   text-align: center;
   margin-top: 20px;
   color: #333;
+  font-family: var(--font-secondary);
 }
 
 .table-container {
