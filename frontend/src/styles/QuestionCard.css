@@ -1,20 +1,63 @@
 @import './Global.css';
 
+.question-card {
+  max-width: 960px;
+  min-height: 600px;
+  background: linear-gradient(to bottom, white 29px, #00b0d7 1px);
+  margin: 50px auto;
+  background-size: 100% 30px;
+  position: relative;
+  padding-top: 100px;
+  padding-left: 160px;
+  padding-right: 20px;
+  overflow: hidden;
+  border-radius: 5px;
+  box-shadow: 3px 3px 3px rgba(0,0,0,.2), 0px 0px 6px rgba(0,0,0,.2);
+}
+
+.question-card::before {
+  content: '';
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 140px;
+  height: 100%;
+  width: 1px;
+  background: #db4034;
+}
+
+.card-header {
+  background: white;
+  position: absolute;
+  top: -68px;
+  left: -155px;
+}
+
+.card-header h2 {
+  font-size: 14px;
+  line-height: 30px;
+  padding: 60px 20px 0 160px;
+  font-family: var(--font-secondary);
+  color: var(--text-color);
+}
+
+.card-content {
+  margin-top: 30px;
+  font-size: 18px;
+  line-height: 30px;
+}
+
 .question-image {
   max-width: 80%;
   height: auto;
   margin-top: 10px;
 }
 
-.card-header h2 {
-  font-family: var(--font-secondary);
-  color: var(--text-color); /* Use global text color */
-}
-
 .option {
   font-family: var(--font-secondary);
-  color: var(--text-color); /* Use global text color */
-  background: #f9f9f9;
+  color: var(--text-color);
+  background: transparent;
   margin: 10px 0;
   padding: 10px;
   border-radius: 5px;
@@ -23,9 +66,23 @@
 }
 
 .option:hover {
-  background: #e0e0e0;
+  background: rgba(224, 224, 224, 0.5);
 }
 
 .option.selected {
-  background: #d0d0d0; /* Change this to the desired highlight color */
+  background: rgba(208, 208, 208, 0.5);
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+button {
+  margin: 0 5px;
+}
+
+.feedback, .explanation, .hint {
+  margin-top: 20px;
 }
