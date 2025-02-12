@@ -507,36 +507,51 @@ func GetWorstQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPracticeTestQuestionsHandler(w http.ResponseWriter, r *http.Request) {
-	var req types.PracticeTestRequest
+	log.Println("Received request to /api/practice-test-questions")
+
+	// Parse request body to get userId if needed
+	var req struct {
+		UserId string `json:"userId"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("Error decoding request body:", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		// Continue even if there's no userId
 	}
 
-	// Get 5 random questions
+	// Select 10 random questions for the practice test
 	rand.Seed(time.Now().UnixNano())
-	numQuestions := 5
+	numQuestions := 10
 	selectedQuestions := make([]types.Question, 0, numQuestions)
 
-	// Create a copy of questions slice to avoid modifying the original
-	availableQuestions := make([]types.Question, len(questions))
-	copy(availableQuestions, questions)
+	// Create a copy of questions to shuffle
+	questionsCopy := make([]types.Question, len(questions))
+	copy(questionsCopy, questions)
 
-	// Randomly select questions
-	for i := 0; i < numQuestions && len(availableQuestions) > 0; i++ {
-		idx := rand.Intn(len(availableQuestions))
-		selectedQuestions = append(selectedQuestions, availableQuestions[idx])
-		// Remove selected question to avoid duplicates
-		availableQuestions = append(availableQuestions[:idx], availableQuestions[idx+1:]...)
+	// Fisher-Yates shuffle
+	for i := len(questionsCopy) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		questionsCopy[i], questionsCopy[j] = questionsCopy[j], questionsCopy[i]
 	}
 
-	response := types.PracticeTestResponse{
+	// Take the first numQuestions
+	if len(questionsCopy) > numQuestions {
+		selectedQuestions = questionsCopy[:numQuestions]
+	} else {
+		selectedQuestions = questionsCopy
+	}
+
+	response := struct {
+		Questions []types.Question `json:"questions"`
+	}{
 		Questions: selectedQuestions,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Println("Error encoding response:", err)
+		http.Error(w, "Error encoding response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func GenerateStudyGuideHandler(w http.ResponseWriter, r *http.Request) {
