@@ -69,6 +69,8 @@ func main() {
 	r.HandleFunc("/api/health", HealthCheckHandler).Methods("GET")
 	r.HandleFunc("/api/hint", HintHandler).Methods("POST", "OPTIONS")
 	r.HandleFunc("/api/worst-questions", GetWorstQuestionsHandler).Methods("GET", "OPTIONS")
+	r.HandleFunc("/api/practice-test-questions", GetPracticeTestQuestionsHandler).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/generate-study-guide", GenerateStudyGuideHandler).Methods("POST", "OPTIONS")
 
 	log.Println("Server is running on port 8080")
 	http.ListenAndServe(":8080", r)

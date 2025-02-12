@@ -73,4 +73,49 @@ export const fetchWorstQuestions = (userId, setWorstQuestions) => {
         .catch(error => console.error('Error fetching worst questions:', error));
 };
 
+export const fetchPracticeTestQuestions = (setQuestions) => {
+    fetch(`${process.env.REACT_APP_API_URL}/api/practice-test-questions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: localStorage.getItem('userId') }),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Practice test questions:', data);
+            setQuestions(data.questions);
+        })
+        .catch(error => console.error('Error fetching practice test questions:', error));
+};
+
+export const generateStudyGuide = (userId, wrongQuestions, score) => {
+    return fetch(`${process.env.REACT_APP_API_URL}/api/generate-study-guide`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            userId,
+            wrongQuestions,
+            score,
+        }),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error generating study guide:', error);
+            throw error;
+        });
+};
+
 

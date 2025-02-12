@@ -1,0 +1,105 @@
+.practice-test-results {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.practice-test-results h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.score {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.score.pass {
+  background-color: #e6f4ea;
+  border: 1px solid #34a853;
+}
+
+.score.fail {
+  background-color: #fce8e6;
+  border: 1px solid #ea4335;
+}
+
+.score h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.wrong-questions {
+  margin-bottom: 2rem;
+}
+
+.wrong-questions h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.wrong-questions ul {
+  list-style: none;
+  padding: 0;
+}
+
+.wrong-questions li {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  border-left: 4px solid #ea4335;
+}
+
+.study-guide {
+  margin-bottom: 2rem;
+}
+
+.study-guide h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.study-guide-content {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 4px;
+  border-left: 4px solid #4285f4;
+  white-space: pre-wrap;
+}
+
+.retry-button {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #3367d6;
+}
+
+@media (max-width: 768px) {
+  .practice-test-results {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .score h3 {
+    font-size: 1.5rem;
+  }
+} 

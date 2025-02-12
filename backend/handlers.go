@@ -505,3 +505,98 @@ func GetWorstQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error encoding response", http.StatusInternalServerError)
 	}
 }
+
+func GetPracticeTestQuestionsHandler(w http.ResponseWriter, r *http.Request) {
+	var req types.PracticeTestRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("Error decoding request body:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get 5 random questions
+	rand.Seed(time.Now().UnixNano())
+	numQuestions := 5
+	selectedQuestions := make([]types.Question, 0, numQuestions)
+
+	// Create a copy of questions slice to avoid modifying the original
+	availableQuestions := make([]types.Question, len(questions))
+	copy(availableQuestions, questions)
+
+	// Randomly select questions
+	for i := 0; i < numQuestions && len(availableQuestions) > 0; i++ {
+		idx := rand.Intn(len(availableQuestions))
+		selectedQuestions = append(selectedQuestions, availableQuestions[idx])
+		// Remove selected question to avoid duplicates
+		availableQuestions = append(availableQuestions[:idx], availableQuestions[idx+1:]...)
+	}
+
+	response := types.PracticeTestResponse{
+		Questions: selectedQuestions,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func GenerateStudyGuideHandler(w http.ResponseWriter, r *http.Request) {
+	var req types.StudyGuideRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("Error decoding request body:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(req.WrongQuestions) == 0 {
+		response := types.StudyGuideResponse{
+			StudyGuide: "No study guide needed - you answered all questions correctly!",
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// Initialize OpenAI client
+	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+
+	// Create a prompt for the study guide
+	var questionsList strings.Builder
+	for i, q := range req.WrongQuestions {
+		questionsList.WriteString(fmt.Sprintf("%d. %s\n", i+1, q.Question))
+	}
+
+	prompt := fmt.Sprintf(
+		"Create a comprehensive study guide for the following AWS questions that were answered incorrectly (score: %.1f%%):\n\n%s\n"+
+			"Please include:\n"+
+			"1. Key concepts and definitions\n"+
+			"2. Explanation of common misconceptions\n"+
+			"3. Best practices and tips\n"+
+			"4. Related AWS services and their relationships\n"+
+			"Make the study guide clear, concise, and easy to understand.",
+		req.Score,
+		questionsList.String(),
+	)
+
+	resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
+		Model: openai.GPT4o,
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: prompt,
+			},
+		},
+		MaxTokens: 2000, // Increased token limit for study guide
+	})
+	if err != nil {
+		log.Println("Error calling OpenAI API:", err)
+		http.Error(w, "Error generating study guide", http.StatusInternalServerError)
+		return
+	}
+
+	response := types.StudyGuideResponse{
+		StudyGuide: resp.Choices[0].Message.Content,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}

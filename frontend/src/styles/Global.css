@@ -7,6 +7,9 @@
   --border-color: #000000; /* Black border */
   --shadow-color: rgba(0, 0, 0, 0.1); /* Shadow color */
   --text-on-primary: white;
+  --font-primary: 'Noto Sans JP', sans-serif;
+  --font-fancy: 'Kaushan Script', cursive;
+  --font-secondary: 'Roboto Mono', monospace;
 }
 
 /* Global Styles */
