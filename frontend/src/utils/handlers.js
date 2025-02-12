@@ -10,11 +10,22 @@ export const handleAnswerSelect = (option, selectedAnswers, setSelectedAnswers) 
 
 export const handleSubmitAnswer = (selectedAnswers, question, setFeedback, updateUserMetrics, updatePerformanceData, currentQuestionId) => {
     if (selectedAnswers.length > 0) {
-        const isCorrect = selectedAnswers.every(answer => answer.correct) && selectedAnswers.length === question.options.filter(option => option.correct).length;
-        setFeedback(isCorrect ? 'Correct!' : 'Incorrect!');
+        const correctAnswers = question.options.filter(option => option.correct);
+        const isCorrect = selectedAnswers.every(answer => answer.correct) && selectedAnswers.length === correctAnswers.length;
+        
+        let feedbackMessage = '';
+        if (isCorrect) {
+            feedbackMessage = 'Correct! Great job!';
+        } else {
+            feedbackMessage = `Incorrect. The correct answer${correctAnswers.length > 1 ? 's are' : ' is'}:\n${correctAnswers.map(answer => answer.text).join('\n')}`;
+        }
+        
+        setFeedback(feedbackMessage);
         updateUserMetrics(isCorrect);
         updatePerformanceData(currentQuestionId, isCorrect);
+        return isCorrect;
     }
+    return false;
 };
 
 export const handleExplain = (selectedAnswers, question, setIsExplanationLoading, setExplanation, correctAnswer) => {

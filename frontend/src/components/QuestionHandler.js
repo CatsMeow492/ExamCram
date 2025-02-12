@@ -73,6 +73,11 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleSubmitAnswerWrapper = () => {
+    if (selectedAnswers.length === 0) {
+      setFeedback("Please select an answer before submitting.");
+      return;
+    }
+
     const isCorrect = handleSubmitAnswer(
       selectedAnswers,
       currentQuestion,
@@ -87,41 +92,26 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
         setWrongQuestions(prev => [...prev, currentQuestion]);
       }
 
-      // Move to next question or show results
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-        setSelectedAnswers([]);
-        setFeedback(null);
-      } else {
-        // Calculate score
-        const score = ((questions.length - wrongQuestions.length) / questions.length) * 100;
-        setTestScore(score);
-
-        // If score is below 80%, request study guide
-        if (score < 80) {
-          fetch(`${process.env.REACT_APP_API_URL}/api/generate-study-guide`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId,
-              wrongQuestions,
-              score,
-            }),
-          })
-            .then(response => response.json())
-            .then(data => {
-              setStudyGuide(data.studyGuide);
-              setShowResults(true);
-            })
-            .catch(error => console.error('Error generating study guide:', error));
+      // Wait 3 seconds before moving to next question
+      setTimeout(() => {
+        if (currentQuestionIndex < questions.length - 1) {
+          setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+          setSelectedAnswers([]);
+          setFeedback(null);
         } else {
+          // Calculate score
+          const score = ((questions.length - wrongQuestions.length) / questions.length) * 100;
+          setTestScore(score);
           setShowResults(true);
         }
-      }
+      }, 3000);
     } else {
-      fetchNextQuestion();
+      // For non-practice test modes, wait 3 seconds before fetching next question
+      setTimeout(() => {
+        fetchQuestion();
+        setSelectedAnswers([]);
+        setFeedback(null);
+      }, 3000);
     }
   };
 
