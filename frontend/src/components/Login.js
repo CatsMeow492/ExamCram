@@ -1,6 +1,8 @@
 import React from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
+import PropTypes from 'prop-types';
+import '../styles/Login.css';
 
 function Login({ setUser, setUserId }) {
   const handleLoginSuccess = (response) => {
@@ -44,5 +46,10 @@ function Login({ setUser, setUserId }) {
     />
   );
 }
+
+Login.propTypes = {
+  setUser: PropTypes.func.isRequired,
+  setUserId: PropTypes.func.isRequired,
+};
 
 export default Login;
