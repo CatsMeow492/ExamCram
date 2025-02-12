@@ -62,8 +62,12 @@ const QuestionCard = ({
           </button>
           <button onClick={fetchRandomQuestion}>Next Question</button>
         </div>
-        {feedback && <p className="feedback">{feedback}</p>}
-        {explanation && <ReactMarkdown className="explanation">{explanation}</ReactMarkdown>} {/* Render explanation as markdown */}
+        {feedback && (
+          <p className={`feedback ${feedback.startsWith('Correct') ? 'correct' : 'incorrect'}`}>
+            {feedback}
+          </p>
+        )}
+        {explanation && <ReactMarkdown className="explanation">{explanation}</ReactMarkdown>}
         {hint && <ReactMarkdown className="hint">{hint}</ReactMarkdown>}
       </div>
     </div>
