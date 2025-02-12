@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import QuestionCard from './QuestionCard';
 import PracticeTestResults from './PracticeTestResults';
 import useFetchRandomQuestion from '../hooks/useFetchRandomQuestion';
@@ -183,5 +184,20 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
     />
   );
 }
+
+QuestionHandler.propTypes = {
+  userId: PropTypes.string.isRequired,
+  updateUserMetrics: PropTypes.func.isRequired,
+  updatePerformanceData: PropTypes.func.isRequired,
+  performanceData: PropTypes.arrayOf(PropTypes.shape({
+    questionId: PropTypes.string,
+    correct: PropTypes.number,
+    incorrect: PropTypes.number,
+  })),
+};
+
+QuestionHandler.defaultProps = {
+  performanceData: [],
+};
 
 export default QuestionHandler;

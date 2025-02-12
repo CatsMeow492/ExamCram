@@ -139,7 +139,7 @@ function App() {
             ) : (
               <h1 className="app-title">Exam Cram</h1>
             )}
-            <h4 className="app-subtitle">When the night before wasn't enough..</h4>
+            <h4 className="app-subtitle">When the night before wasn&apos;t enough..</h4>
             {!user ? (
               <Login setUser={setUser} setUserId={setUserId} />
             ) : (
