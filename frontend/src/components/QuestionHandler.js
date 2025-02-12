@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import QuestionCard from './QuestionCard';
+import PracticeTestResults from './PracticeTestResults';
 import useFetchRandomQuestion from '../hooks/useFetchRandomQuestion';
 import useFetchPracticeTestQuestions from '../hooks/useFetchPracticeTestQuestions';
 import useFetchWorstQuestions from '../hooks/useFetchWorstQuestions';
@@ -17,6 +18,10 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
   const [explanation, setExplanation] = useState(null);
   const [hint, setHint] = useState(null);
   const [performanceMetrics, setPerformanceMetrics] = useState({});
+  const [wrongQuestions, setWrongQuestions] = useState([]);
+  const [studyGuide, setStudyGuide] = useState(null);
+  const [showResults, setShowResults] = useState(false);
+  const [testScore, setTestScore] = useState(0);
   
   // Separate loading states
   const [isQuestionLoading, setIsQuestionLoading] = useState(false);
@@ -67,6 +72,59 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
 
   const currentQuestion = questions[currentQuestionIndex];
 
+  const handleSubmitAnswerWrapper = () => {
+    const isCorrect = handleSubmitAnswer(
+      selectedAnswers,
+      currentQuestion,
+      setFeedback,
+      updateUserMetrics,
+      updatePerformanceData,
+      currentQuestion?.id
+    );
+
+    if (studyOption === 'practice-test') {
+      if (!isCorrect) {
+        setWrongQuestions(prev => [...prev, currentQuestion]);
+      }
+
+      // Move to next question or show results
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+        setSelectedAnswers([]);
+        setFeedback(null);
+      } else {
+        // Calculate score
+        const score = ((questions.length - wrongQuestions.length) / questions.length) * 100;
+        setTestScore(score);
+
+        // If score is below 80%, request study guide
+        if (score < 80) {
+          fetch(`${process.env.REACT_APP_API_URL}/api/generate-study-guide`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId,
+              wrongQuestions,
+              score,
+            }),
+          })
+            .then(response => response.json())
+            .then(data => {
+              setStudyGuide(data.studyGuide);
+              setShowResults(true);
+            })
+            .catch(error => console.error('Error generating study guide:', error));
+        } else {
+          setShowResults(true);
+        }
+      }
+    } else {
+      fetchNextQuestion();
+    }
+  };
+
   const fetchNextQuestion = () => {
     setSelectedAnswers([]);
     setFeedback(null);
@@ -77,17 +135,6 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
     } else {
       fetchQuestion();
     }
-  };
-
-  const handleSubmitAnswerWrapper = () => {
-    handleSubmitAnswer(
-      selectedAnswers,
-      currentQuestion,
-      setFeedback,
-      updateUserMetrics,
-      updatePerformanceData,
-      currentQuestion?.id
-    );
   };
 
   const handleExplainWrapper = () => {
@@ -101,8 +148,30 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
     handleHint(currentQuestion, setHint, setIsHintLoading);
   };
 
+  const handleRetry = () => {
+    setShowResults(false);
+    setWrongQuestions([]);
+    setStudyGuide(null);
+    setTestScore(0);
+    setCurrentQuestionIndex(0);
+    setSelectedAnswers([]);
+    setFeedback(null);
+    fetchQuestion();
+  };
+
   if (isQuestionLoading) {
     return <div>Loading question...</div>;
+  }
+
+  if (showResults) {
+    return (
+      <PracticeTestResults
+        score={testScore}
+        wrongQuestions={wrongQuestions}
+        studyGuide={studyGuide}
+        onRetry={handleRetry}
+      />
+    );
   }
 
   return (

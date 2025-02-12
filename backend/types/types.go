@@ -48,3 +48,21 @@ type PerformanceData struct {
 	Correct    int    `json:"correct" dynamodbav:"Correct"`
 	Incorrect  int    `json:"incorrect" dynamodbav:"Incorrect"`
 }
+
+type PracticeTestRequest struct {
+	UserId string `json:"userId"`
+}
+
+type PracticeTestResponse struct {
+	Questions []Question `json:"questions"`
+}
+
+type StudyGuideRequest struct {
+	UserId         string     `json:"userId"`
+	WrongQuestions []Question `json:"wrongQuestions"`
+	Score          float64    `json:"score"`
+}
+
+type StudyGuideResponse struct {
+	StudyGuide string `json:"studyGuide"`
+}

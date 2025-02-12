@@ -52,3 +52,4 @@ backend/questions.json
 backend/batches/
 backend/formatted_questions.json
 backend/raw_questions.txt
+.cursor/
