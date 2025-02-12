@@ -509,45 +509,37 @@ func GetWorstQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 func GetPracticeTestQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request to /api/practice-test-questions")
 
-	// Parse request body to get userId if needed
+	// Parse request body
 	var req struct {
 		UserId string `json:"userId"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("Error decoding request body:", err)
-		// Continue even if there's no userId
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
 	}
 
-	// Select 10 random questions for the practice test
-	rand.Seed(time.Now().UnixNano())
-	numQuestions := 10
-	selectedQuestions := make([]types.Question, 0, numQuestions)
-
-	// Create a copy of questions to shuffle
+	// Create a copy of the questions slice to shuffle
 	questionsCopy := make([]types.Question, len(questions))
 	copy(questionsCopy, questions)
 
-	// Fisher-Yates shuffle
+	// Shuffle the questions using Fisher-Yates algorithm
+	rand.Seed(time.Now().UnixNano())
 	for i := len(questionsCopy) - 1; i > 0; i-- {
 		j := rand.Intn(i + 1)
 		questionsCopy[i], questionsCopy[j] = questionsCopy[j], questionsCopy[i]
 	}
 
-	// Take the first numQuestions
-	if len(questionsCopy) > numQuestions {
-		selectedQuestions = questionsCopy[:numQuestions]
-	} else {
-		selectedQuestions = questionsCopy
+	// Select the first 10 questions (or all if less than 10)
+	numQuestions := 10
+	if len(questionsCopy) < numQuestions {
+		numQuestions = len(questionsCopy)
 	}
+	selectedQuestions := questionsCopy[:numQuestions]
 
-	response := struct {
-		Questions []types.Question `json:"questions"`
-	}{
-		Questions: selectedQuestions,
-	}
-
+	// Return the selected questions
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	if err := json.NewEncoder(w).Encode(selectedQuestions); err != nil {
 		log.Println("Error encoding response:", err)
 		http.Error(w, "Error encoding response", http.StatusInternalServerError)
 		return
