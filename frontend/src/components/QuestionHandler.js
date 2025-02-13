@@ -8,6 +8,8 @@ import useFetchPracticeTestQuestions from '../hooks/useFetchPracticeTestQuestion
 import useFetchWorstQuestions from '../hooks/useFetchWorstQuestions';
 import { handleAnswerSelect, handleSubmitAnswer, handleExplain, handleHint } from '../utils/handlers';
 
+const PRACTICE_TEST_LENGTH = 5;
+
 function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, performanceData }) {
   const location = useLocation();
   const studyOption = location.state?.studyMode || 'random';
@@ -71,6 +73,13 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
     }
   }, [questions, currentQuestionIndex, userId]);
 
+  useEffect(() => {
+    if (studyOption === 'practice-test' && questions.length > PRACTICE_TEST_LENGTH) {
+      // Slice the questions array to only include the first PRACTICE_TEST_LENGTH questions
+      setQuestions(questions.slice(0, PRACTICE_TEST_LENGTH));
+    }
+  }, [questions, studyOption]);
+
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleSubmitAnswerWrapper = () => {
@@ -95,15 +104,35 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
 
       // Wait 3 seconds before moving to next question
       setTimeout(() => {
-        if (currentQuestionIndex < questions.length - 1) {
+        if (currentQuestionIndex < PRACTICE_TEST_LENGTH - 1) {
           setCurrentQuestionIndex(prevIndex => prevIndex + 1);
           setSelectedAnswers([]);
           setFeedback(null);
         } else {
           // Calculate score
-          const score = ((questions.length - wrongQuestions.length) / questions.length) * 100;
+          const score = ((PRACTICE_TEST_LENGTH - wrongQuestions.length) / PRACTICE_TEST_LENGTH) * 100;
           setTestScore(score);
           setShowResults(true);
+
+          // If score is below 80%, generate study guide
+          if (score < 80) {
+            fetch(`${process.env.REACT_APP_API_URL}/api/generate-study-guide`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userId,
+                wrongQuestions,
+                score,
+              }),
+            })
+              .then(response => response.json())
+              .then(data => {
+                setStudyGuide(data.studyGuide);
+              })
+              .catch(error => console.error('Error generating study guide:', error));
+          }
         }
       }, 3000);
     } else {
