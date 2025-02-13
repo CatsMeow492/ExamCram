@@ -5,6 +5,7 @@
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #333333;
 }
 
 .practice-test-results h2 {
@@ -33,6 +34,11 @@
 .score h3 {
   font-size: 2rem;
   margin-bottom: 1rem;
+  color: #333333;
+}
+
+.score p {
+  color: #333333;
 }
 
 .wrong-questions {
@@ -55,6 +61,7 @@
   margin-bottom: 1rem;
   border-radius: 4px;
   border-left: 4px solid #ea4335;
+  color: #333333;
 }
 
 .study-guide {
@@ -72,6 +79,7 @@
   border-radius: 4px;
   border-left: 4px solid #4285f4;
   white-space: pre-wrap;
+  color: #333333;
 }
 
 .retry-button {
