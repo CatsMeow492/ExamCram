@@ -3,90 +3,78 @@
 .question-card {
   max-width: 960px;
   min-height: 600px;
-  background: linear-gradient(to bottom, white 29px, #00b0d7 1px);
+  background-color: #2b2b2b;
   margin: 50px auto;
-  background-size: 100% 30px;
   position: relative;
-  padding-top: 100px;
-  padding-left: 160px;
-  padding-right: 20px;
-  overflow: hidden;
-  border-radius: 5px;
-  box-shadow: 3px 3px 3px rgba(0,0,0,.2), 0px 0px 6px rgba(0,0,0,.2);
-}
-
-.question-card::before {
-  content: '';
-  display: block;
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  left: 140px;
-  height: 100%;
-  width: 1px;
-  background: #db4034;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
-  background: white;
-  position: absolute;
-  top: -68px;
-  left: -155px;
+  margin-bottom: 20px;
 }
 
 .card-header h2 {
-  font-size: 14px;
-  line-height: 30px;
-  padding: 60px 20px 0 160px;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--text-on-primary);
   font-family: var(--font-secondary);
-  color: var(--text-color);
 }
 
 .card-content {
   margin-top: 30px;
   font-size: 18px;
-  line-height: 30px;
+  line-height: 1.6;
+  color: var(--text-on-primary);
 }
 
 .question-image {
   max-width: 80%;
   height: auto;
-  margin-top: 10px;
+  margin: 20px 0;
+  border-radius: 8px;
 }
 
 .option {
   font-family: var(--font-secondary);
-  color: var(--text-color);
-  background: transparent;
+  color: var(--text-on-primary);
+  background: #363636;
   margin: 10px 0;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 15px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.2s;
+  list-style: none;
 }
 
 .option:hover {
-  background: rgba(224, 224, 224, 0.5);
+  background: #404040;
+  transform: translateX(5px);
 }
 
 .option.selected {
-  background: rgba(208, 208, 208, 0.5);
+  background: var(--primary-color);
+  color: white;
 }
 
 .button-container {
   display: flex;
   justify-content: space-around;
-  margin-top: 20px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 button {
   margin: 0 5px;
+  min-width: 120px;
 }
 
 .feedback {
   margin-top: 20px;
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 8px;
   font-weight: 500;
   white-space: pre-line;
   text-align: center;
@@ -94,15 +82,15 @@ button {
 }
 
 .feedback.correct {
-  background-color: rgba(76, 175, 80, 0.1);
-  color: #2e7d32;
-  border: 1px solid #2e7d32;
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+  border: 1px solid #81c784;
 }
 
 .feedback.incorrect {
-  background-color: rgba(244, 67, 54, 0.1);
-  color: #d32f2f;
-  border: 1px solid #d32f2f;
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #e57373;
+  border: 1px solid #e57373;
 }
 
 @keyframes fadeIn {
@@ -118,9 +106,17 @@ button {
 
 .explanation, .hint {
   margin-top: 20px;
-  color: #333;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: var(--text-on-primary);
+  background-color: #363636;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.performance-metrics {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #363636;
+  border-radius: 8px;
+  color: var(--text-on-primary);
 }
