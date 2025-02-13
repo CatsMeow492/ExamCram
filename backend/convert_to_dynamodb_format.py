@@ -28,26 +28,46 @@ def clean_question_data(question_data):
         # Remove "Most Voted" and similar markers
         text = re.sub(r'\s*Most Voted\s*', '', text)
         
-        # Split if the text contains E., F. etc. indicating combined answers
-        if re.search(r'\s+[E-F]\.\s+', text):
-            text = re.sub(r'\s+[E-F]\.\s+.*$', '', text)
-            
         # Clean up any double spaces and trim
         text = ' '.join(text.split())
         
-        # Determine if this option should be marked as correct
-        is_correct = option["correct"]
-        if i in most_voted_indices and not any(opt["correct"] for opt in question_data["options"]):
-            is_correct = True
-        
-        # For multi-select questions, keep original correct flags
-        if is_multi_select:
+        # Check for letter prefixes in the middle of text (e.g., "something E. something else")
+        if re.search(r'[A-F]\.\s+\w', text):
+            # Split on letter prefixes that are followed by text
+            parts = re.split(r'([A-F]\.)\s+(?=\w)', text)
+            processed_parts = []
+            current_part = ""
+            
+            for part in parts:
+                if re.match(r'^[A-F]\.$', part):
+                    if current_part:
+                        processed_parts.append(current_part.strip())
+                    current_part = ""
+                else:
+                    current_part += part
+            
+            if current_part:
+                processed_parts.append(current_part.strip())
+            
+            # Add each part as a separate option
+            for part in processed_parts:
+                if part:  # Only add non-empty parts
+                    # Remove any remaining letter prefixes at the start
+                    part = re.sub(r'^[A-F]\.\s*', '', part)
+                    cleaned["options"].append({
+                        "text": part.strip(),
+                        "correct": option["correct"]
+                    })
+        else:
+            # No letter prefixes found, add the option as is
             is_correct = option["correct"]
-        
-        cleaned["options"].append({
-            "text": text,
-            "correct": is_correct
-        })
+            if i in most_voted_indices and not any(opt["correct"] for opt in question_data["options"]):
+                is_correct = True
+            
+            cleaned["options"].append({
+                "text": text,
+                "correct": is_correct
+            })
     
     return cleaned
 
