@@ -15,6 +15,7 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
   const studyOption = location.state?.studyMode || 'random';
 
   const [questions, setQuestions] = useState([]);
+  const [initialQuestions, setInitialQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [feedback, setFeedback] = useState(null);
@@ -56,6 +57,12 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
   useEffect(() => {
     fetchQuestion();
   }, [fetchQuestion]);
+
+  useEffect(() => {
+    if (questions.length > 0 && initialQuestions.length === 0) {
+      setInitialQuestions(questions);
+    }
+  }, [questions, initialQuestions]);
 
   useEffect(() => {
     setPerformanceMetrics(performanceData);
@@ -179,6 +186,17 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
     fetchQuestion();
   };
 
+  const handleRetryWithSameQuestions = () => {
+    setShowResults(false);
+    setWrongQuestions([]);
+    setStudyGuide(null);
+    setTestScore(0);
+    setCurrentQuestionIndex(0);
+    setSelectedAnswers([]);
+    setFeedback(null);
+    setQuestions(initialQuestions);
+  };
+
   if (isQuestionLoading) {
     return <div>Loading question...</div>;
   }
@@ -190,6 +208,7 @@ function QuestionHandler({ userId, updateUserMetrics, updatePerformanceData, per
         wrongQuestions={wrongQuestions}
         studyGuide={studyGuide}
         onRetry={handleRetry}
+        onRetryWithSameQuestions={handleRetryWithSameQuestions}
       />
     );
   }

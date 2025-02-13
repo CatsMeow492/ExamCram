@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import '../styles/PracticeTestResults.css';
 
-const PracticeTestResults = ({ score, wrongQuestions, studyGuide, onRetry }) => {
+const PracticeTestResults = ({ score, wrongQuestions, studyGuide, onRetry, onRetryWithSameQuestions }) => {
   const isPass = score >= 80;
 
   return (
@@ -36,9 +36,14 @@ const PracticeTestResults = ({ score, wrongQuestions, studyGuide, onRetry }) => 
         </div>
       )}
 
-      <button className="retry-button" onClick={onRetry}>
-        Try Another Practice Test
-      </button>
+      <div className="button-container">
+        <button className="retry-button" onClick={onRetryWithSameQuestions}>
+          Retry With Same Questions
+        </button>
+        <button className="retry-button new-questions" onClick={onRetry}>
+          Try With New Questions
+        </button>
+      </div>
     </div>
   );
 };
@@ -54,6 +59,7 @@ PracticeTestResults.propTypes = {
   })).isRequired,
   studyGuide: PropTypes.string,
   onRetry: PropTypes.func.isRequired,
+  onRetryWithSameQuestions: PropTypes.func.isRequired,
 };
 
 export default PracticeTestResults; 
