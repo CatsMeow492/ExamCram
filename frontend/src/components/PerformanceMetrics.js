@@ -19,13 +19,43 @@ const PerformanceMetrics = ({ performanceData = [] }) => {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
+    // Debug logging
+    console.log('PerformanceMetrics component received data:', performanceData);
+    
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [performanceData]);
 
   // Calculate summary metrics and pie chart data
   const { totalAttempts, totalCorrect, totalIncorrect, percentageCorrect, percentageIncorrect, pieChartData } = useMemo(() => {
-    const totalCorrect = performanceData.reduce((total, item) => total + item.correct, 0);
-    const totalIncorrect = performanceData.reduce((total, item) => total + item.incorrect, 0);
+    console.log('Performance data for calculations:', performanceData);
+    
+    if (!Array.isArray(performanceData)) {
+      console.error('Performance data is not an array:', performanceData);
+      return {
+        totalAttempts: 0,
+        totalCorrect: 0,
+        totalIncorrect: 0,
+        percentageCorrect: 0,
+        percentageIncorrect: 0,
+        pieChartData: {
+          labels: ['Correct', 'Incorrect'],
+          datasets: [{
+            data: [0, 0],
+            backgroundColor: ['#36A2EB', '#FF6384'],
+            hoverBackgroundColor: ['#36A2EB', '#FF6384']
+          }]
+        }
+      };
+    }
+    
+    const totalCorrect = performanceData.reduce((total, item) => {
+      return total + (typeof item.correct === 'number' ? item.correct : 0);
+    }, 0);
+    
+    const totalIncorrect = performanceData.reduce((total, item) => {
+      return total + (typeof item.incorrect === 'number' ? item.incorrect : 0);
+    }, 0);
+    
     const totalAttempts = totalCorrect + totalIncorrect;
     const percentageCorrect = totalAttempts > 0 ? (totalCorrect / totalAttempts) * 100 : 0;
     const percentageIncorrect = totalAttempts > 0 ? (totalIncorrect / totalAttempts) * 100 : 0;
@@ -42,14 +72,28 @@ const PerformanceMetrics = ({ performanceData = [] }) => {
     return { totalAttempts, totalCorrect, totalIncorrect, percentageCorrect, percentageIncorrect, pieChartData };
   }, [performanceData]);
 
+  // Check if we have any data to display
+  if (!Array.isArray(performanceData) || performanceData.length === 0) {
+    return (
+      <div className="performance-metrics">
+        <h2 className="metrics-title">Performance Metrics</h2>
+        <p className="metrics-description">No performance data available yet. Answer some questions to see your metrics.</p>
+      </div>
+    );
+  }
+
   // Prepare data for the heatmap
   const maxSquaresPerRow = isMobile ? 8 : 15;
   const data = [];
 
   for (let i = 0; i < Math.ceil(performanceData.length / maxSquaresPerRow); i++) {
     const row = performanceData.slice(i * maxSquaresPerRow, (i + 1) * maxSquaresPerRow).map(item => {
-      if (item.correct + item.incorrect === 0) return null; // Unattempted
-      return item.correct / (item.correct + item.incorrect);
+      const correct = typeof item.correct === 'number' ? item.correct : 0;
+      const incorrect = typeof item.incorrect === 'number' ? item.incorrect : 0;
+      const total = correct + incorrect;
+      
+      if (total === 0) return null; // Unattempted
+      return correct / total;
     });
     data.push(row);
   }
@@ -74,6 +118,8 @@ const PerformanceMetrics = ({ performanceData = [] }) => {
               <div className="heatmap-cells">
                 {row.map((value, colIndex) => {
                   const questionNumber = rowIndex * maxSquaresPerRow + colIndex + 1;
+                  const questionId = performanceData[rowIndex * maxSquaresPerRow + colIndex]?.questionId || `Question ${questionNumber}`;
+                  
                   return (
                     <div
                       key={colIndex}
@@ -89,7 +135,7 @@ const PerformanceMetrics = ({ performanceData = [] }) => {
                        hoveredCell.rowIndex === rowIndex && 
                        hoveredCell.colIndex === colIndex && (
                         <div className="cell-tooltip">
-                          <span>Q{questionNumber}: </span>
+                          <span>{questionId}: </span>
                           <span>{value !== null ? `${(value * 100).toFixed(0)}%` : 'N/A'}</span>
                         </div>
                       )}

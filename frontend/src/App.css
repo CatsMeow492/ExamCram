@@ -1,0 +1,25 @@
+/* Add styles for correct and incorrect answer highlighting */
+.correct-answer {
+  border: 2px solid #4caf50 !important;
+  background-color: rgba(76, 175, 80, 0.1) !important;
+  position: relative;
+}
+
+.correct-answer::after {
+  content: "✓ Correct Answer";
+  position: absolute;
+  right: 10px;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.incorrect-selection {
+  border: 2px solid #f44336 !important;
+  background-color: rgba(244, 67, 54, 0.1) !important;
+}
+
+/* Make sure selected options have appropriate styling */
+.option.selected {
+  background-color: #e3f2fd;
+  border: 2px solid #2196f3;
+} 

@@ -1,0 +1,187 @@
+.question-handler {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.question-container {
+  width: 100%;
+  background-color: rgba(40, 44, 52, 0.7);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.question-text {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+  background-color: rgba(60, 64, 72, 0.7);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.option:hover {
+  background-color: rgba(80, 84, 92, 0.7);
+}
+
+.option.selected {
+  background-color: rgba(0, 123, 255, 0.5);
+}
+
+.option.correct {
+  background-color: rgba(40, 167, 69, 0.5);
+}
+
+.option.incorrect {
+  background-color: rgba(220, 53, 69, 0.5);
+}
+
+.option-text {
+  margin-left: 10px;
+  flex: 1;
+  text-align: left;
+}
+
+.feedback {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.feedback.correct {
+  background-color: rgba(40, 167, 69, 0.3);
+  color: #a3f9b5;
+}
+
+.feedback.incorrect {
+  background-color: rgba(220, 53, 69, 0.3);
+  color: #ffb3b9;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.submit-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.submit-button:hover {
+  background-color: #1976d2;
+}
+
+.next-button {
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  padding: 12px 25px;
+  font-size: 18px;
+  animation: pulse 1.5s infinite;
+}
+
+.next-button:hover {
+  background-color: #388e3c;
+  transform: scale(1.05);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+.explain-button {
+  background-color: #ff9800;
+  color: white;
+}
+
+.explain-button:hover {
+  background-color: #f57c00;
+}
+
+.hint-button {
+  background-color: #9c27b0;
+  color: white;
+}
+
+.hint-button:hover {
+  background-color: #7b1fa2;
+}
+
+.explanation, .hint {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(60, 64, 72, 0.7);
+  border-radius: 4px;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.error-message {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: bold;
+  animation: fadeIn 0.3s ease-in;
+  display: block;
+  max-width: 800px;
+  margin: 10px auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

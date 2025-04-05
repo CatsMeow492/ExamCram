@@ -6,28 +6,44 @@ import '../styles/QuestionCard.css';
 const QuestionCard = ({ 
   question, 
   selectedAnswers, 
-  handleAnswerSelect, 
-  handleSubmitAnswer, 
+  onAnswerSelect,
   feedback, 
-  handleExplain, 
-  isExplanationLoading, 
   explanation, 
-  fetchRandomQuestion, 
-  handleHint, 
-  isHintLoading, 
   hint, 
-  performanceMetrics, 
-  studyMode 
+  performanceData,
+  correctAnswer
 }) => {
   if (!question || !question.options) {
-    return <p>Loading...</p>; // Display a loading message or spinner
+    return <p>Loading question data...</p>;
   }
 
-  console.log('Performance metrics in QuestionCard:', performanceMetrics);
-  console.log('Question in QuestionCard:', question);
-  console.log('Study mode in QuestionCard:', studyMode);
-  // Find the performance metrics for the current question
-  const currentQuestionMetrics = performanceMetrics.find(metric => metric.questionId === question.id) || { correct: 0, incorrect: 0 };
+  // Debug the performance data we received
+  console.log('Performance data in QuestionCard:', performanceData);
+
+  // Find the performance metrics for the current question - with defensive check
+  let currentQuestionMetrics = { correct: 0, incorrect: 0 };
+
+  // First check if performanceData is just the metrics for this question (object)
+  if (performanceData && typeof performanceData === 'object' && !Array.isArray(performanceData)) {
+    console.log('Using direct performance metrics:', performanceData);
+    currentQuestionMetrics = performanceData;
+  } 
+  // Then check if it's an array and we need to find this question's metrics
+  else if (Array.isArray(performanceData) && performanceData.length > 0) {
+    console.log('Searching for metrics in array with questionId:', question.id);
+    const foundMetric = performanceData.find(metric => metric.questionId === question.id);
+    if (foundMetric) {
+      console.log('Found metric in array:', foundMetric);
+      currentQuestionMetrics = foundMetric;
+    }
+  }
+  
+  // Ensure we have numeric values for correct/incorrect
+  currentQuestionMetrics.correct = currentQuestionMetrics.correct || 0;
+  currentQuestionMetrics.incorrect = currentQuestionMetrics.incorrect || 0;
+
+  // Determine if we need to show the correct answer (when feedback is shown and answer was incorrect)
+  const showCorrectAnswer = feedback && correctAnswer;
 
   return (
     <div className="question-card">
@@ -36,38 +52,58 @@ const QuestionCard = ({
       </div>
       <div className="card-content">
         {question.imageUrl && <img src={question.imageUrl} alt="Question" className="question-image" />}
-        {studyMode === 'practice-worst' && performanceMetrics && (
+        
+        {/* Always show performance metrics if they exist */}
+        {(currentQuestionMetrics.correct > 0 || currentQuestionMetrics.incorrect > 0) && (
           <div className="performance-metrics">
+            <p>Your history with this question:</p>
             <p>Correct: {currentQuestionMetrics.correct} | Incorrect: {currentQuestionMetrics.incorrect}</p>
           </div>
         )}
-        <ul>
-          {question.options.map((option, idx) => (
-            <li
-              key={idx}
-              onClick={() => handleAnswerSelect(option)}
-              className={`option ${selectedAnswers.includes(option) ? 'selected' : ''}`}
-            >
-              {option.text}
-            </li>
-          ))}
+        
+        <ul className="options-list">
+          {question.options.map((option, idx) => {
+            // Determine the appropriate class for this option
+            let optionClass = "option";
+            
+            // Check if this option is selected - fix selection display
+            const isSelected = selectedAnswers === idx || 
+                              (Array.isArray(selectedAnswers) && selectedAnswers.includes(idx));
+            
+            if (isSelected) {
+              optionClass += " selected";
+              
+              // If feedback exists and this wasn't the correct answer
+              if (feedback && correctAnswer && option.text !== correctAnswer) {
+                optionClass += " incorrect-selection";
+              }
+            }
+            
+            // Highlight the correct answer when showing feedback after incorrect submission
+            if (showCorrectAnswer && option.text === correctAnswer) {
+              optionClass += " correct-answer";
+            }
+            
+            return (
+              <li
+                key={idx}
+                onClick={() => onAnswerSelect(idx)}
+                className={optionClass}
+              >
+                {option.text}
+              </li>
+            );
+          })}
         </ul>
-        <div className="button-container">
-          <button onClick={handleSubmitAnswer}>Submit Answer</button>
-          <button onClick={handleExplain} disabled={isExplanationLoading}>
-            {isExplanationLoading ? 'Loading...' : 'Explain'}
-          </button>
-          <button onClick={handleHint} disabled={isHintLoading}>
-            {isHintLoading ? 'Loading...' : 'Hint'}
-          </button>
-          <button onClick={fetchRandomQuestion}>Next Question</button>
-        </div>
+        
         {feedback && (
-          <p className={`feedback ${feedback.startsWith('Correct') ? 'correct' : 'incorrect'}`}>
-            {feedback}
+          <p className={`feedback ${typeof feedback === 'string' && feedback.startsWith('Correct') ? 'correct' : 'incorrect'}`}>
+            {typeof feedback === 'object' ? feedback.feedback || feedback.message || 'Response received' : feedback}
           </p>
         )}
+        
         {explanation && <ReactMarkdown className="explanation">{explanation}</ReactMarkdown>}
+        
         {hint && <ReactMarkdown className="hint">{hint}</ReactMarkdown>}
       </div>
     </div>
@@ -77,18 +113,21 @@ const QuestionCard = ({
 QuestionCard.propTypes = {
   question: PropTypes.object,
   selectedAnswers: PropTypes.array.isRequired,
-  handleAnswerSelect: PropTypes.func.isRequired,
-  handleSubmitAnswer: PropTypes.func.isRequired,
+  onAnswerSelect: PropTypes.func.isRequired,
   feedback: PropTypes.string,
-  handleExplain: PropTypes.func.isRequired,
-  isExplanationLoading: PropTypes.bool.isRequired,
   explanation: PropTypes.string,
-  fetchRandomQuestion: PropTypes.func.isRequired,
-  handleHint: PropTypes.func.isRequired,
-  isHintLoading: PropTypes.bool.isRequired,
   hint: PropTypes.string,
-  performanceMetrics: PropTypes.array,
-  studyMode: PropTypes.string.isRequired, // Add studyMode prop type
+  performanceData: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array
+  ]),
+  correctAnswer: PropTypes.string
+};
+
+QuestionCard.defaultProps = {
+  performanceData: null,
+  selectedAnswers: [],
+  correctAnswer: null
 };
 
 export default QuestionCard;

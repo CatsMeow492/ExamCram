@@ -1,0 +1,8 @@
+2025/04/04 18:16:13 Data directory: /Users/taylormohney/Documents/GitHub/ExamCram/backend/local_data
+2025/04/04 18:16:13 Attempting to write to local-data.json (absolute path)
+2025/04/04 18:16:13 Successfully wrote to local-data.json
+2025/04/04 18:16:13 File existence verified: local-data.json
+2025/04/04 18:16:13 Initialized in-memory storage
+2025/04/04 18:16:13 Loading questions from file: ./formatted_questions.json
+2025/04/04 18:16:13 Loaded 250 questions
+2025/04/04 18:16:13 Server is running on port 8080

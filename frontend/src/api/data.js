@@ -34,7 +34,25 @@ export const fetchPerformanceData = (userId, setPerformanceData) => {
             return response.json();
         })
         .then(data => {
-            setPerformanceData(data || {});
+            // Format the data as expected by PerformanceMetrics
+            // The component expects an array of objects with correct and incorrect properties
+            console.log('Raw performance data:', data);
+            
+            // Transform the data if it's not already in the expected format
+            let formattedData = data;
+            
+            // If the data is an array of objects with QuestionId, Correct, and Incorrect properties
+            // (format from the backend), transform it to the format expected by PerformanceMetrics
+            if (Array.isArray(data) && data.length > 0 && 'QuestionId' in data[0]) {
+                formattedData = data.map(item => ({
+                    questionId: item.QuestionId,
+                    correct: item.Correct,
+                    incorrect: item.Incorrect
+                }));
+            }
+            
+            console.log('Formatted performance data:', formattedData);
+            setPerformanceData(formattedData);
         })
         .catch(error => console.error('Error fetching performance data:', error));
 };
@@ -74,12 +92,20 @@ export const fetchWorstQuestions = (userId, setWorstQuestions) => {
 };
 
 export const fetchPracticeTestQuestions = (setQuestions) => {
+    // Add a timestamp to the request body, but don't use custom headers
+    const requestTimestamp = Date.now();
+    console.log(`Fetching practice test questions, timestamp: ${requestTimestamp}`);
+    
     fetch(`${process.env.REACT_APP_API_URL}/api/practice-test-questions`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
+            // Removed 'X-Request-ID' header to prevent CORS issues
         },
-        body: JSON.stringify({ userId: localStorage.getItem('userId') }),
+        body: JSON.stringify({ 
+            userId: localStorage.getItem('userId'),
+            timestamp: requestTimestamp // Keep timestamp in the body
+        }),
     })
         .then(response => {
             if (!response.ok) {
@@ -88,10 +114,15 @@ export const fetchPracticeTestQuestions = (setQuestions) => {
             return response.json();
         })
         .then(data => {
-            console.log('Practice test questions:', data);
-            setQuestions(data.questions);
+            console.log(`Practice test questions loaded (timestamp: ${requestTimestamp}):`, data);
+            if (data && data.questions && Array.isArray(data.questions)) {
+                console.log(`Loaded ${data.questions.length} questions`);
+                setQuestions(data.questions);
+            } else {
+                console.error('Received invalid practice test data format:', data);
+            }
         })
-        .catch(error => console.error('Error fetching practice test questions:', error));
+        .catch(error => console.error(`Error fetching practice test questions (timestamp: ${requestTimestamp}):`, error));
 };
 
 export const generateStudyGuide = (userId, wrongQuestions, score) => {

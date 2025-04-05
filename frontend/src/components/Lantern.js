@@ -1,7 +1,13 @@
 import React from 'react';
 import './Lantern.css';
 
-const Lantern = (firstColor, secondColor, thirdColor) => {
+const Lantern = ({ lightColor }) => {
+  const { firstColor, secondColor, thirdColor } = lightColor || { 
+    firstColor: '#171717', 
+    secondColor: '#4e4e4e', 
+    thirdColor: '#171717' 
+  };
+
   return (
     <div className="lanternContainer">
       <div className="Lantern">
@@ -56,7 +62,7 @@ const Lantern = (firstColor, secondColor, thirdColor) => {
           <path d="M 50 0 L 169 0 C 197 0 219 22 219 50 L 219 190 C 219 218 197 240 169 240 L 50 240 C 22 240 0 218 0 190 L 0 50 C 0 36 6 23 16 14 C 24 5 37 0 50 0 Z"></path>
         </svg>
         <svg className="leftSeam" viewBox="780 460 30 240">
-          <path d="M 804 458 C 802 458 789 472 783 500 C 780 522 777 555 777 581 C 777 604 780 642 783 661 C 789 692 802 698 804 698 C 806 698 798 686 795 661 C 792 640 790 610 580 C 790 555 792 528 795 506 C 798 477 806 458 804 448 Z"></path>
+          <path d="M 804 458 C 802 458 789 472 783 500 C 780 522 777 555 777 581 C 777 604 780 642 783 661 C 789 692 802 698 804 698 C 806 698 798 686 795 661 C 792 640 790 610 790 580 C 790 555 792 528 795 506 C 798 477 806 458 804 458 Z"></path>
         </svg>
         <svg className="middleSeam" viewBox="850 460 10 240">
           <path d="M 857 459 C 854 459 850 521 850 580 C 850 640 854 698 857 698 C 859 698 860 640 860 580 C 860 521 859 459 857 459 Z"></path>

@@ -6,35 +6,41 @@
   align-items: center;
   gap: 20px;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: var(--bg-secondary);
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 750px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 800px;
+  margin: 20px auto;
+  width: 100%;
+  color: var(--text-primary);
 }
 
 .metrics-title {
   font-size: 24px;
   font-weight: bold;
-  color: #333;
+  margin-bottom: 0;
   font-family: var(--font-secondary);
+  color: var(--text-primary);
 }
 
 .metrics-description {
   font-size: 16px;
-  color: #666;
   margin-bottom: 20px;
   text-align: center;
   font-family: var(--font-secondary);
+  color: var(--text-secondary);
 }
 
 .chart-container {
   flex: 1;
-  max-width: 800px;
-  background-color: #fff;
+  width: 100%;
+  max-width: 400px;
+  background-color: rgba(255, 255, 255, 0.1);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
+  margin: 10px 0;
 }
 
 .chart-container:hover {
@@ -50,8 +56,17 @@
 .metrics-summary {
   text-align: center;
   margin-top: 20px;
-  color: #333;
   font-family: var(--font-secondary);
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.metrics-summary p {
+  margin: 8px 0;
+  font-size: 16px;
 }
 
 .table-container {
@@ -88,11 +103,12 @@ tr:hover {
   width: 100%;
   overflow-x: auto;
   padding: 20px;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: center;
+  margin: 10px 0;
 }
 
 #x-labels-list {
@@ -145,6 +161,8 @@ tr:hover {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
+  gap: 5px;
+  padding: 10px;
 }
 
 .heatmap-row {
@@ -162,6 +180,7 @@ tr:hover {
 
 .heatmap-cells {
   display: flex;
+  gap: 5px;
 }
 
 .heatmap-cell {
@@ -171,26 +190,56 @@ tr:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  color: #fff; /* Change to white for better contrast */
-  border: 1px solid #ccc;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000; /* Dark text for better visibility */
+  border: 1px solid rgba(255, 255, 255, 0.3);
   margin: 1px;
   transition: all 0.3s ease;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.5); /* Add text shadow for better readability */
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Add a darker text shadow for better readability, especially on bright backgrounds */
+.heatmap-cell {
+  text-shadow: 
+    -1px -1px 0 rgba(255, 255, 255, 0.7),
+    1px -1px 0 rgba(255, 255, 255, 0.7),
+    -1px 1px 0 rgba(255, 255, 255, 0.7),
+    1px 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.1);
+  z-index: 5;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .cell-tooltip {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 5px);
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 5px;
+  padding: 8px 12px;
   border-radius: 4px;
   font-size: 12px;
   white-space: nowrap;
   z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.cell-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent rgba(0, 0, 0, 0.8);
 }
 
 /* Remove these classes as they're no longer needed */
@@ -199,6 +248,10 @@ tr:hover {
 }
 
 @media (max-width: 768px) {
+  .performance-metrics {
+    padding: 15px 10px;
+  }
+  
   .heatmap-cell {
     width: 30px;
     height: 30px;
@@ -207,6 +260,12 @@ tr:hover {
 
   .cell-tooltip {
     font-size: 10px;
+    padding: 5px 8px;
+  }
+  
+  .chart-container,
+  .metrics-summary {
+    max-width: 90%;
   }
 }
 

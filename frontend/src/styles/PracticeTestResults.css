@@ -74,12 +74,39 @@
 }
 
 .study-guide-content {
-  background-color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 4px;
-  border-left: 4px solid #4285f4;
-  white-space: pre-wrap;
-  color: #333333;
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.study-guide-content h1,
+.study-guide-content h2,
+.study-guide-content h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.study-guide-content ul,
+.study-guide-content ol {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.study-guide-content li {
+  margin-bottom: 5px;
+}
+
+.study-guide-content code {
+  background-color: #eee;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
 }
 
 .button-container {

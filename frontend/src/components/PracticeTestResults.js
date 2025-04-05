@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ReactMarkdown from 'react-markdown';
 import '../styles/PracticeTestResults.css';
 
 const PracticeTestResults = ({ score, wrongQuestions, studyGuide, onRetry, onRetryWithSameQuestions }) => {
@@ -31,7 +32,7 @@ const PracticeTestResults = ({ score, wrongQuestions, studyGuide, onRetry, onRet
         <div className="study-guide">
           <h3>Personalized Study Guide</h3>
           <div className="study-guide-content">
-            {studyGuide}
+            <ReactMarkdown>{studyGuide}</ReactMarkdown>
           </div>
         </div>
       )}

@@ -1,21 +1,21 @@
 package main
 
 import (
-	"backend/helpers"
 	"backend/types" // Import the types package
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/gorilla/mux"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -49,17 +49,33 @@ func ExplainHandler(w http.ResponseWriter, r *http.Request) {
 	// Join the correct answers into a single string
 	correctAnswersStr := strings.Join(req.CorrectAnswers, ", ")
 
-	prompt := fmt.Sprintf(
-		"Question: %s\nSelected Answer(s): %s\nCorrect Answer(s): %s\n"+
-			"Explanation: Please provide a comprehensive explanation that covers the following points:\n"+
-			"1. Why the correct answer(s) is/are correct.\n"+
-			"2. If the selected answer(s) is/are incorrect, explain why it's/they're wrong.\n"+
-			"3. Provide any additional context or information that helps understand the concept better.\n"+
-			"Please explain in a simple, intuitive, and easy-to-remember way. Limit your response to %d words.",
-		req.Question,
-		strings.Join(req.SelectedAnswers, ", "),
-		correctAnswersStr,
-		maxTokens)
+	var prompt string
+	if len(req.SelectedAnswers) > 0 {
+		// If the user has selected answers, include them in the explanation
+		prompt = fmt.Sprintf(
+			"Question: %s\nSelected Answer(s): %s\nCorrect Answer(s): %s\n"+
+				"Explanation: Please provide a comprehensive explanation that covers the following points:\n"+
+				"1. Why the correct answer(s) is/are correct.\n"+
+				"2. If the selected answer(s) is/are incorrect, explain why it's/they're wrong.\n"+
+				"3. Provide any additional context or information that helps understand the concept better.\n"+
+				"Please explain in a simple, intuitive, and easy-to-remember way. Limit your response to %d words.",
+			req.Question,
+			strings.Join(req.SelectedAnswers, ", "),
+			correctAnswersStr,
+			maxTokens)
+	} else {
+		// If no answers are selected, just explain the correct answer
+		prompt = fmt.Sprintf(
+			"Question: %s\nCorrect Answer(s): %s\n"+
+				"Explanation: Please provide a comprehensive explanation that covers the following points:\n"+
+				"1. Why the correct answer(s) is/are correct.\n"+
+				"2. Explain why each of the other possible options would be incorrect.\n"+
+				"3. Provide any additional context or information that helps understand the concept better.\n"+
+				"Please explain in a simple, intuitive, and easy-to-remember way. Limit your response to %d words.",
+			req.Question,
+			correctAnswersStr,
+			maxTokens)
+	}
 
 	resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
 		Model: openai.GPT4o,
@@ -97,31 +113,14 @@ func GetUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("UserMetrics"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"UserId": {
-				S: aws.String(userID),
-			},
-		},
-	})
-	if err != nil {
-		log.Println("Error getting item:", err)
-		http.Error(w, "Error getting item", http.StatusInternalServerError)
-		return
-	}
-
-	if result.Item == nil {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-
-	var metrics types.UserMetrics
-	err = dynamodbattribute.UnmarshalMap(result.Item, &metrics)
-	if err != nil {
-		log.Println("Error unmarshalling item:", err)
-		http.Error(w, "Error unmarshalling item", http.StatusInternalServerError)
-		return
+	metrics, exists := getUserMetrics(userID)
+	if !exists {
+		// If user doesn't exist yet, return empty metrics
+		metrics = types.UserMetrics{
+			UserId:           userID,
+			CorrectAnswers:   0,
+			IncorrectAnswers: 0,
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -144,226 +143,226 @@ func UpdateUserMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch current metrics
-	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("UserMetrics"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"UserId": {
-				S: aws.String(metrics.UserId),
-			},
-		},
-	})
-	if err != nil {
-		log.Println("Error getting item:", err)
-		http.Error(w, "Error getting item", http.StatusInternalServerError)
-		return
-	}
+	// Update metrics in our in-memory storage
+	updateUserMetrics(metrics)
 
-	var currentMetrics types.UserMetrics
-	if result.Item != nil {
-		err = dynamodbattribute.UnmarshalMap(result.Item, &currentMetrics)
-		if err != nil {
-			log.Println("Error unmarshalling item:", err)
-			http.Error(w, "Error unmarshalling item", http.StatusInternalServerError)
-			return
-		}
-	}
-
-	// Increment the current values
-	newCorrectAnswers := currentMetrics.CorrectAnswers + metrics.CorrectAnswers
-	newIncorrectAnswers := currentMetrics.IncorrectAnswers + metrics.IncorrectAnswers
-
-	updateExpression := "SET CorrectAnswers = :correct, IncorrectAnswers = :incorrect"
-	attributeValues := map[string]*dynamodb.AttributeValue{
-		":correct": {
-			N: aws.String(fmt.Sprintf("%d", newCorrectAnswers)),
-		},
-		":incorrect": {
-			N: aws.String(fmt.Sprintf("%d", newIncorrectAnswers)),
-		},
-	}
-
-	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("UserMetrics"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"UserId": {
-				S: aws.String(metrics.UserId),
-			},
-		},
-		UpdateExpression:          aws.String(updateExpression),
-		ExpressionAttributeValues: attributeValues,
-		ReturnValues:              aws.String("UPDATED_NEW"),
-	}
-
-	log.Printf("Updating UserMetrics table: UpdateExpression: %s, AttributeValues: %+v\n", updateExpression, attributeValues)
-
-	_, err = svc.UpdateItem(updateItemInput)
-	if err != nil {
-		log.Printf("Error updating UserMetrics: %v\n", err)
-		http.Error(w, "Error updating UserMetrics", http.StatusInternalServerError)
-		return
-	}
-
-	metrics.CorrectAnswers = newCorrectAnswers
-	metrics.IncorrectAnswers = newIncorrectAnswers
+	// Return the updated metrics
+	updatedMetrics, _ := getUserMetrics(metrics.UserId)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(metrics)
+	json.NewEncoder(w).Encode(updatedMetrics)
 }
 
 func UpdatePerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
-	var performanceData types.QuestionPerformance
+	var req struct {
+		UserId         string `json:"userId"`
+		QuestionId     string `json:"questionId"`
+		IsCorrect      bool   `json:"isCorrect"`
+		TimeTaken      int    `json:"timeTaken"`
+		IsPracticeTest bool   `json:"isPracticeTest"`
+	}
 
-	// Decode the request body
-	err := json.NewDecoder(r.Body).Decode(&performanceData)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("Error decoding request body:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("DEBUG: Received UpdatePerformanceData request: userId=%s, questionId=%s, isCorrect=%v, isPracticeTest=%v",
+		req.UserId, req.QuestionId, req.IsCorrect, req.IsPracticeTest)
+
+	// Validate required fields
+	if req.UserId == "" || req.QuestionId == "" {
+		log.Println("UserId and QuestionId are required but missing")
+		http.Error(w, "UserId and QuestionId are required", http.StatusBadRequest)
+		return
+	}
+
+	// Record this attempt in the history
+	type Attempt struct {
+		UserId         string    `json:"userId"`
+		QuestionId     string    `json:"questionId"`
+		IsCorrect      bool      `json:"isCorrect"`
+		TimeTaken      int       `json:"timeTaken"`
+		IsPracticeTest bool      `json:"isPracticeTest"`
+		Timestamp      time.Time `json:"timestamp"`
+	}
+
+	attempt := Attempt{
+		UserId:         req.UserId,
+		QuestionId:     req.QuestionId,
+		IsCorrect:      req.IsCorrect,
+		TimeTaken:      req.TimeTaken,
+		IsPracticeTest: req.IsPracticeTest,
+		Timestamp:      time.Now(),
+	}
+
+	// Path to the history file
+	historyFile := filepath.Join(".", "attempts-history.json")
+
+	// Read existing history if it exists
+	var history []Attempt
+	historyData, err := os.ReadFile(historyFile)
+	if err == nil {
+		// File exists, parse it
+		if err := json.Unmarshal(historyData, &history); err != nil {
+			log.Printf("ERROR: Parsing existing history file: %v", err)
+			// Continue with empty history if we can't parse the file
+			history = []Attempt{}
+		}
+	} else if !os.IsNotExist(err) {
+		// Some error other than file not existing
+		log.Printf("ERROR: Reading history file: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Add new attempt to history
+	history = append(history, attempt)
+
+	// Write updated history back to file
+	updatedHistoryData, err := json.MarshalIndent(history, "", "  ")
 	if err != nil {
-		log.Println("Invalid request payload:", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		log.Printf("ERROR: Marshalling history data: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("Received performance data: %+v\n", performanceData)
-
-	if performanceData.UserId == "" || performanceData.QuestionId == "" {
-		log.Println("userId and questionId are required")
-		http.Error(w, "userId and questionId are required", http.StatusBadRequest)
+	if err := os.WriteFile(historyFile, updatedHistoryData, 0644); err != nil {
+		log.Printf("ERROR: Writing history file: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	// Update UserMetrics table
-	updateExpression := "ADD CorrectAnswers :inc"
-	attributeValues := map[string]*dynamodb.AttributeValue{
-		":inc": {
-			N: aws.String("1"),
-		},
+	log.Printf("DEBUG: Successfully added attempt to history file")
+
+	// Update question statistics
+	type QuestionStat struct {
+		QuestionId string    `json:"questionId"`
+		UserId     string    `json:"userId"`
+		Correct    int       `json:"correct"`
+		Incorrect  int       `json:"incorrect"`
+		LastUpdate time.Time `json:"lastUpdate"`
 	}
 
-	if performanceData.Correct == 0 {
-		updateExpression = "ADD IncorrectAnswers :inc"
+	// Path to the stats file
+	statsFile := filepath.Join(".", "question-stats.json")
+
+	// Read existing stats if they exist
+	var stats []QuestionStat
+	statsData, err := os.ReadFile(statsFile)
+	if err == nil {
+		// File exists, parse it
+		if err := json.Unmarshal(statsData, &stats); err != nil {
+			log.Printf("ERROR: Parsing existing stats file: %v", err)
+			// Continue with empty stats if we can't parse the file
+			stats = []QuestionStat{}
+		}
+	} else if !os.IsNotExist(err) {
+		// Some error other than file not existing
+		log.Printf("ERROR: Reading stats file: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
-	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("UserMetrics"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"UserId": {
-				S: aws.String(performanceData.UserId),
-			},
-		},
-		UpdateExpression:          aws.String(updateExpression),
-		ExpressionAttributeValues: attributeValues,
-		ReturnValues:              aws.String("UPDATED_NEW"),
+	// Find the stat entry for this user+question or create a new one
+	var statUpdated bool
+	for i, stat := range stats {
+		if stat.UserId == req.UserId && stat.QuestionId == req.QuestionId {
+			// Update existing stat
+			if req.IsCorrect {
+				stats[i].Correct++
+			} else {
+				stats[i].Incorrect++
+			}
+			stats[i].LastUpdate = time.Now()
+			statUpdated = true
+			break
+		}
 	}
 
-	log.Printf("Updating UserMetrics table: UpdateExpression: %s, AttributeValues: %+v\n", updateExpression, attributeValues)
+	if !statUpdated {
+		// Create new stat
+		newStat := QuestionStat{
+			QuestionId: req.QuestionId,
+			UserId:     req.UserId,
+			Correct:    0,
+			Incorrect:  0,
+			LastUpdate: time.Now(),
+		}
 
-	_, err = svc.UpdateItem(updateItemInput)
+		// Increment the appropriate counter
+		if req.IsCorrect {
+			newStat.Correct = 1
+		} else {
+			newStat.Incorrect = 1
+		}
+
+		stats = append(stats, newStat)
+	}
+
+	// Write updated stats back to file
+	updatedStatsData, err := json.MarshalIndent(stats, "", "  ")
 	if err != nil {
-		log.Printf("Error updating UserMetrics: %v\n", err)
-		http.Error(w, "Error updating UserMetrics", http.StatusInternalServerError)
+		log.Printf("ERROR: Marshalling stats data: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	// Update QuestionPerformance table
-	qpUpdateExpression := "ADD Correct :inc"
-	if performanceData.Correct == 0 {
-		qpUpdateExpression = "ADD Incorrect :inc"
+	if err := os.WriteFile(statsFile, updatedStatsData, 0644); err != nil {
+		log.Printf("ERROR: Writing stats file: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
-	qpUpdateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("QuestionPerformance"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"UserId": {
-				S: aws.String(performanceData.UserId),
-			},
-			"QuestionId": {
-				S: aws.String(performanceData.QuestionId),
-			},
-		},
-		UpdateExpression:          aws.String(qpUpdateExpression),
-		ExpressionAttributeValues: attributeValues,
-		ReturnValues:              aws.String("UPDATED_NEW"),
-	}
+	log.Printf("DEBUG: Successfully updated question statistics")
 
-	log.Printf("Updating QuestionPerformance table: UpdateExpression: %s, AttributeValues: %+v\n", qpUpdateExpression, attributeValues)
+	// Also update performance data in our in-memory storage
+	updatePerformanceData(req.UserId, req.QuestionId, req.IsCorrect)
 
-	_, err = svc.UpdateItem(qpUpdateItemInput)
+	// Also write to local-data.json for backward compatibility
+	attemptData, err := json.MarshalIndent(attempt, "", "  ")
 	if err != nil {
-		log.Printf("Error updating QuestionPerformance: %v\n", err)
-		http.Error(w, "Error updating QuestionPerformance", http.StatusInternalServerError)
-		return
+		log.Printf("ERROR: Marshalling attempt data for local-data.json: %v", err)
+	} else if err := os.WriteFile(filepath.Join(".", "local-data.json"), attemptData, 0644); err != nil {
+		log.Printf("ERROR: Writing to local-data.json: %v", err)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(performanceData)
+	w.WriteHeader(http.StatusOK)
+}
+
+// Helper function to get current directory
+func getCurrentDirectory() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Printf("ERROR: Failed to get current working directory: %v", err)
+		return "unknown"
+	}
+	return dir
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		IDToken string `json:"idToken"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println("Invalid request payload:", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		log.Println("Error decoding request body:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	payload, err := verifyIDToken(req.IDToken)
-	if err != nil {
-		log.Println("Invalid ID token:", err)
-		http.Error(w, "Invalid ID token", http.StatusUnauthorized)
-		return
-	}
-
-	userID := payload.Subject
-	email := payload.Claims["email"].(string)
-	name := payload.Claims["name"].(string)
-	picture := payload.Claims["picture"].(string)
-
+	// In local mode, we'll just create a mock user based on the token
+	// In a real implementation, you would verify the token with Google
 	user := types.User{
-		UserID:  userID,
-		Email:   email,
-		Name:    name,
-		Picture: picture,
+		UserID:  req.IDToken, // Use the token as a user ID for simplicity
+		Email:   "local@example.com",
+		Name:    "Local User",
+		Picture: "https://example.com/profile.jpg",
 	}
 
-	log.Printf("User struct: %+v\n", user)
-
-	// Check if user exists
-	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("Users"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"UserID": {
-				S: aws.String(userID),
-			},
-		},
-	})
-	if err != nil {
-		log.Println("Error checking user existence:", err)
-		http.Error(w, "Error checking user existence", http.StatusInternalServerError)
-		return
-	}
-
-	if result.Item == nil {
-		// User does not exist, create new user
-		av, err := dynamodbattribute.MarshalMap(user)
-		if err != nil {
-			log.Println("Error marshalling user data:", err)
-			http.Error(w, "Error marshalling user data", http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("Marshalled user data: %+v\n", av)
-
-		_, err = svc.PutItem(&dynamodb.PutItemInput{
-			TableName: aws.String("Users"),
-			Item:      av,
-		})
-		if err != nil {
-			log.Println("Error creating user:", err)
-			http.Error(w, "Error creating user", http.StatusInternalServerError)
-			return
-		}
-	}
+	// Save the user
+	saveUser(user)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
@@ -371,63 +370,113 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetPerformanceDataHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("userId")
+	questionID := r.URL.Query().Get("questionId")
+
+	log.Printf("GetPerformanceDataHandler called with userId=%s, questionId=%s", userID, questionID)
+
 	if userID == "" {
 		http.Error(w, "Missing userId", http.StatusBadRequest)
 		return
 	}
 
-	result, err := svc.Query(&dynamodb.QueryInput{
-		TableName: aws.String("QuestionPerformance"),
-		KeyConditions: map[string]*dynamodb.Condition{
-			"UserId": {
-				ComparisonOperator: aws.String("EQ"),
-				AttributeValueList: []*dynamodb.AttributeValue{
-					{
-						S: aws.String(userID),
-					},
-				},
-			},
-		},
-	})
+	// Read performance data from question-stats.json directly
+	statsFile := filepath.Join(".", "question-stats.json")
+	statsData, err := os.ReadFile(statsFile)
 	if err != nil {
-		log.Println("Error querying QuestionPerformance table:", err)
-		http.Error(w, "Error querying QuestionPerformance table", http.StatusInternalServerError)
+		log.Printf("ERROR: Failed to read stats file: %v", err)
+		http.Error(w, "Failed to read performance data", http.StatusInternalServerError)
 		return
 	}
 
-	var performanceData []types.QuestionPerformance
-	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &performanceData)
-	if err != nil {
-		log.Println("Error unmarshalling query result:", err)
-		http.Error(w, "Error unmarshalling query result", http.StatusInternalServerError)
+	type QuestionStat struct {
+		QuestionId string    `json:"questionId"`
+		UserId     string    `json:"userId"`
+		Correct    int       `json:"correct"`
+		Incorrect  int       `json:"incorrect"`
+		LastUpdate time.Time `json:"lastUpdate"`
+	}
+
+	var allStats []QuestionStat
+	if err := json.Unmarshal(statsData, &allStats); err != nil {
+		log.Printf("ERROR: Failed to parse stats file: %v", err)
+		http.Error(w, "Failed to parse performance data", http.StatusInternalServerError)
 		return
 	}
+
+	// If questionId is provided, return just that one metric as an object (not an array)
+	if questionID != "" {
+		log.Printf("Looking for specific question performance: %s", questionID)
+		var foundStat *types.PerformanceData
+
+		for _, stat := range allStats {
+			if stat.UserId == userID && stat.QuestionId == questionID {
+				foundStat = &types.PerformanceData{
+					QuestionId: stat.QuestionId,
+					Correct:    stat.Correct,
+					Incorrect:  stat.Incorrect,
+				}
+				break
+			}
+		}
+
+		if foundStat != nil {
+			log.Printf("Found performance metric for questionId=%s: correct=%d, incorrect=%d",
+				questionID, foundStat.Correct, foundStat.Incorrect)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(foundStat)
+		} else {
+			log.Printf("No performance data found for questionId=%s", questionID)
+			// Return an empty object with the questionId instead of an empty array
+			emptyMetric := types.PerformanceData{
+				QuestionId: questionID,
+				Correct:    0,
+				Incorrect:  0,
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(emptyMetric)
+		}
+		return
+	}
+
+	// Otherwise filter stats for this user and return as array
+	userStats := make([]types.PerformanceData, 0)
+	for _, stat := range allStats {
+		if stat.UserId == userID {
+			userStats = append(userStats, types.PerformanceData{
+				QuestionId: stat.QuestionId,
+				Correct:    stat.Correct,
+				Incorrect:  stat.Incorrect,
+			})
+		}
+	}
+
+	log.Printf("Returning %d performance records for user %s", len(userStats), userID)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(performanceData)
+	json.NewEncoder(w).Encode(userStats)
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	w.Write([]byte("OK"))
 }
 
 func HintHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received request to /hint")
 	var req types.HintRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("Error decoding request body:", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Initialize OpenAI client
 	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 
 	prompt := fmt.Sprintf(
-		"Question: %s\nHint: Please provide a hint to help answer this question, make sure to define all the terms and services necessary to understand the question. The hint should be concise and to the point and limited to %d tokens.",
-		req.Question, maxTokens)
+		"I'm studying for an exam and struggling with this question: '%s'\n"+
+			"Please provide a hint that nudges me in the right direction without giving away the answer. "+
+			"The hint should be clear enough to help me understand the concept, but vague enough that I still need to think about it.",
+		req.Question,
+	)
 
 	resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
 		Model: openai.GPT4o,
@@ -437,7 +486,7 @@ func HintHandler(w http.ResponseWriter, r *http.Request) {
 				Content: prompt,
 			},
 		},
-		MaxTokens: maxTokens,
+		MaxTokens: 150,
 	})
 	if err != nil {
 		log.Println("Error calling OpenAI API:", err)
@@ -452,98 +501,196 @@ func HintHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Println("Error encoding response:", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func GetWorstQuestionsHandler(w http.ResponseWriter, r *http.Request) {
-	userId := r.URL.Query().Get("userId")
-	if userId == "" {
-		http.Error(w, "userId is required", http.StatusBadRequest)
+	// First try to get userId from URL vars (for /api/practice-worst-questions/{userId})
+	vars := mux.Vars(r)
+	userID := vars["userId"]
+
+	// If not found in URL vars, try query parameters (for /api/worst-questions?userId=xxx)
+	if userID == "" {
+		userID = r.URL.Query().Get("userId")
+	}
+
+	// If still not found, return an error
+	if userID == "" {
+		http.Error(w, "Missing userId in path or query parameters", http.StatusBadRequest)
 		return
 	}
 
-	log.Printf("Fetching performance data for userId: %s", userId)
+	log.Printf("GetWorstQuestionsHandler: Processing request for userId=%s", userID)
 
-	// Fetch performance data for the user
-	performanceData, err := helpers.FetchPerformanceData(userId)
+	limit := 10 // Default limit to 10 worst questions
+
+	// Get performance data from question-stats.json instead of in-memory storage
+	statsFile := filepath.Join(".", "question-stats.json")
+	statsData, err := os.ReadFile(statsFile)
 	if err != nil {
-		log.Printf("Error fetching performance data: %v", err)
-		http.Error(w, "Error fetching performance data", http.StatusInternalServerError)
+		log.Printf("ERROR: Failed to read stats file: %v", err)
+		http.Error(w, "Failed to read performance data", http.StatusInternalServerError)
 		return
 	}
 
-	// Sort questions by the number of incorrect answers
-	sort.Slice(performanceData, func(i, j int) bool {
-		return performanceData[i].Incorrect > performanceData[j].Incorrect
+	type QuestionStat struct {
+		QuestionId string    `json:"questionId"`
+		UserId     string    `json:"userId"`
+		Correct    int       `json:"correct"`
+		Incorrect  int       `json:"incorrect"`
+		LastUpdate time.Time `json:"lastUpdate"`
+	}
+
+	var allStats []QuestionStat
+	if err := json.Unmarshal(statsData, &allStats); err != nil {
+		log.Printf("ERROR: Failed to parse stats file: %v", err)
+		http.Error(w, "Failed to parse performance data", http.StatusInternalServerError)
+		return
+	}
+
+	// Filter stats for this user
+	userStats := make(map[string]types.PerformanceData)
+	for _, stat := range allStats {
+		if stat.UserId == userID {
+			userStats[stat.QuestionId] = types.PerformanceData{
+				QuestionId: stat.QuestionId,
+				Correct:    stat.Correct,
+				Incorrect:  stat.Incorrect,
+			}
+		}
+	}
+
+	// Create a slice to sort
+	type QuestionPerformance struct {
+		QuestionID string
+		Score      float64 // Lower is worse
+	}
+
+	performanceSlice := make([]QuestionPerformance, 0, len(userStats))
+	for questionID, data := range userStats {
+		// Calculate a score - prioritize questions with more incorrect answers
+		// and a low correct/incorrect ratio
+		total := data.Correct + data.Incorrect
+		if total == 0 {
+			continue // Skip questions with no attempts
+		}
+
+		// Score formula: incorrect answers have more weight than correct ones
+		score := float64(data.Correct) / float64(total)
+
+		performanceSlice = append(performanceSlice, QuestionPerformance{
+			QuestionID: questionID,
+			Score:      score,
+		})
+	}
+
+	// If no performance data is found, return a random selection of questions
+	if len(performanceSlice) == 0 {
+		log.Printf("No performance data found for user %s, returning random questions", userID)
+		GetPracticeTestQuestionsHandler(w, r) // Reuse existing handler for random questions
+		return
+	}
+
+	// Sort by score (lower is worse)
+	sort.Slice(performanceSlice, func(i, j int) bool {
+		return performanceSlice[i].Score < performanceSlice[j].Score
 	})
 
-	// Select the top N worst questions
-	const topN = 10
-	if len(performanceData) > topN {
-		performanceData = performanceData[:topN]
+	// Limit the number of questions
+	if len(performanceSlice) > limit {
+		performanceSlice = performanceSlice[:limit]
 	}
 
-	// Fetch the question details for the worst questions
-	worstQuestions := make([]types.Question, len(performanceData)) // Change Question to types.Question
-	for i, data := range performanceData {
-		log.Printf("Fetching question details for questionId: %s", data.QuestionId)
-		question, err := helpers.FetchQuestionById(data.QuestionId)
-		if err != nil {
-			log.Printf("Error fetching question details for questionId %s: %v", data.QuestionId, err)
-			http.Error(w, "Error fetching question details", http.StatusInternalServerError)
-			return
+	// Get the actual question objects
+	worstQuestions := make([]types.Question, 0, len(performanceSlice))
+	for _, perf := range performanceSlice {
+		if question, exists := questionsByID[perf.QuestionID]; exists {
+			worstQuestions = append(worstQuestions, question)
 		}
-		worstQuestions[i] = question
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(worstQuestions); err != nil {
-		log.Printf("Error encoding response: %v", err)
-		http.Error(w, "Error encoding response", http.StatusInternalServerError)
+	// If we couldn't find enough matching questions, pad with random ones
+	if len(worstQuestions) < 5 {
+		log.Printf("Only found %d worst questions for user %s, adding random questions", len(worstQuestions), userID)
+
+		// Make a copy of all questions to shuffle
+		questionPool := make([]types.Question, len(questions))
+		copy(questionPool, questions)
+
+		// Shuffle the questions
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(questionPool), func(i, j int) {
+			questionPool[i], questionPool[j] = questionPool[j], questionPool[i]
+		})
+
+		// Add random questions until we have at least 5
+		for _, q := range questionPool {
+			// Skip if already in worstQuestions
+			alreadyIncluded := false
+			for _, wq := range worstQuestions {
+				if wq.ID == q.ID {
+					alreadyIncluded = true
+					break
+				}
+			}
+
+			if !alreadyIncluded {
+				worstQuestions = append(worstQuestions, q)
+				if len(worstQuestions) >= 5 {
+					break
+				}
+			}
+		}
 	}
+
+	log.Printf("Returning %d worst questions for user %s", len(worstQuestions), userID)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(worstQuestions)
 }
 
 func GetPracticeTestQuestionsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received request to /api/practice-test-questions")
-
-	// Parse request body
-	var req struct {
-		UserId string `json:"userId"`
+	// Only try to decode the body for POST requests
+	if r.Method == "POST" {
+		var req types.PracticeTestRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			log.Println("Error decoding request body:", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// For future use - we could personalize questions based on userId
+		// userId := req.UserId
+	} else {
+		// For GET requests, userId could be in query parameters
+		// userId := r.URL.Query().Get("userId")
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println("Error decoding request body:", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
+
+	// For a practice test, let's select 5 random questions
+	// In a more sophisticated implementation, this could be personalized
+	// based on the user's performance
+	numQuestions := 5
+	if len(questions) < numQuestions {
+		numQuestions = len(questions)
 	}
 
-	// Create a copy of the questions slice to shuffle
-	questionsCopy := make([]types.Question, len(questions))
-	copy(questionsCopy, questions)
+	// Make a copy of the questions to shuffle
+	questionPool := make([]types.Question, len(questions))
+	copy(questionPool, questions)
 
-	// Shuffle the questions using Fisher-Yates algorithm
+	// Shuffle the questions
 	rand.Seed(time.Now().UnixNano())
-	for i := len(questionsCopy) - 1; i > 0; i-- {
-		j := rand.Intn(i + 1)
-		questionsCopy[i], questionsCopy[j] = questionsCopy[j], questionsCopy[i]
+	rand.Shuffle(len(questionPool), func(i, j int) {
+		questionPool[i], questionPool[j] = questionPool[j], questionPool[i]
+	})
+
+	// Take the first numQuestions
+	testQuestions := questionPool[:numQuestions]
+
+	response := types.PracticeTestResponse{
+		Questions: testQuestions,
 	}
 
-	// Select the first 10 questions (or all if less than 10)
-	numQuestions := 10
-	if len(questionsCopy) < numQuestions {
-		numQuestions = len(questionsCopy)
-	}
-	selectedQuestions := questionsCopy[:numQuestions]
-
-	// Return the selected questions
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(selectedQuestions); err != nil {
-		log.Println("Error encoding response:", err)
-		http.Error(w, "Error encoding response", http.StatusInternalServerError)
-		return
-	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func GenerateStudyGuideHandler(w http.ResponseWriter, r *http.Request) {
@@ -554,34 +701,24 @@ func GenerateStudyGuideHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.WrongQuestions) == 0 {
-		response := types.StudyGuideResponse{
-			StudyGuide: "No study guide needed - you answered all questions correctly!",
-		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-		return
+	// Extract question texts from the wrong questions
+	var wrongQuestionTexts []string
+	for _, q := range req.WrongQuestions {
+		wrongQuestionTexts = append(wrongQuestionTexts, q.Question)
 	}
 
-	// Initialize OpenAI client
 	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 
-	// Create a prompt for the study guide
-	var questionsList strings.Builder
-	for i, q := range req.WrongQuestions {
-		questionsList.WriteString(fmt.Sprintf("%d. %s\n", i+1, q.Question))
-	}
-
 	prompt := fmt.Sprintf(
-		"Create a comprehensive study guide for the following AWS questions that were answered incorrectly (score: %.1f%%):\n\n%s\n"+
-			"Please include:\n"+
-			"1. Key concepts and definitions\n"+
-			"2. Explanation of common misconceptions\n"+
-			"3. Best practices and tips\n"+
-			"4. Related AWS services and their relationships\n"+
-			"Make the study guide clear, concise, and easy to understand.",
-		req.Score,
-		questionsList.String(),
+		"You scored %.1f%% on your practice test. Here are the questions you got wrong:\n\n%s\n\n"+
+			"Based on these questions, generate a focused study guide that:\n"+
+			"1. Identifies the key concepts you should review\n"+
+			"2. Provides explanations of these concepts\n"+
+			"3. Offers memory aids or techniques to help you remember\n"+
+			"4. Suggests practice exercises\n\n"+
+			"Make the study guide concise but comprehensive. Focus on the areas where you seem to be struggling the most.",
+		req.Score*100,
+		strings.Join(wrongQuestionTexts, "\n"),
 	)
 
 	resp, err := client.CreateChatCompletion(r.Context(), openai.ChatCompletionRequest{
@@ -592,7 +729,7 @@ func GenerateStudyGuideHandler(w http.ResponseWriter, r *http.Request) {
 				Content: prompt,
 			},
 		},
-		MaxTokens: 2000, // Increased token limit for study guide
+		MaxTokens: 1000,
 	})
 	if err != nil {
 		log.Println("Error calling OpenAI API:", err)
@@ -600,10 +737,121 @@ func GenerateStudyGuideHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	studyGuide := resp.Choices[0].Message.Content
+
 	response := types.StudyGuideResponse{
-		StudyGuide: resp.Choices[0].Message.Content,
+		StudyGuide: studyGuide,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func SubmitAnswerHandler(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		QuestionId     string `json:"questionId"`
+		Answer         string `json:"answer"`
+		UserId         string `json:"userId"`
+		Time           int    `json:"time"`
+		IsPracticeTest bool   `json:"isPracticeTest"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("Error decoding request body:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("DEBUG: Received SubmitAnswer request: userId=%s, questionId=%s, answer=%s",
+		req.UserId, req.QuestionId, req.Answer)
+
+	// Find the question to evaluate the answer
+	var correctAnswer string
+	var isCorrect bool
+
+	for _, q := range questions {
+		if q.ID == req.QuestionId {
+			for _, opt := range q.Options {
+				if opt.Correct {
+					correctAnswer = opt.Text
+				}
+				if opt.Text == req.Answer && opt.Correct {
+					isCorrect = true
+				}
+			}
+			break
+		}
+	}
+
+	response := struct {
+		IsCorrect     bool   `json:"isCorrect"`
+		CorrectAnswer string `json:"correctAnswer"`
+		Feedback      string `json:"feedback"`
+	}{
+		IsCorrect:     isCorrect,
+		CorrectAnswer: correctAnswer,
+		Feedback:      getFeedbackForAnswer(isCorrect),
+	}
+
+	// Update performance data in the background
+	go func() {
+		updateReq := struct {
+			UserId         string `json:"userId"`
+			QuestionId     string `json:"questionId"`
+			IsCorrect      bool   `json:"isCorrect"`
+			TimeTaken      int    `json:"timeTaken"`
+			IsPracticeTest bool   `json:"isPracticeTest"`
+		}{
+			UserId:         req.UserId,
+			QuestionId:     req.QuestionId,
+			IsCorrect:      isCorrect,
+			TimeTaken:      req.Time,
+			IsPracticeTest: req.IsPracticeTest,
+		}
+
+		jsonData, err := json.Marshal(updateReq)
+		if err != nil {
+			log.Printf("ERROR: Failed to marshal performance update: %v", err)
+			return
+		}
+
+		// Create an internal request to update performance data
+		updateURL := "/api/performance"
+		httpReq := httptest.NewRequest(http.MethodPost, updateURL, bytes.NewBuffer(jsonData))
+		httpReq.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+
+		// Call the performance update handler directly
+		UpdatePerformanceDataHandler(recorder, httpReq)
+
+		if recorder.Code != http.StatusOK {
+			log.Printf("ERROR: Failed to update performance data: %s", recorder.Body.String())
+		}
+	}()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Helper function to get feedback based on answer correctness
+func getFeedbackForAnswer(isCorrect bool) string {
+	if isCorrect {
+		correctFeedback := []string{
+			"Great job! That's correct!",
+			"Excellent! You got it right!",
+			"Perfect! You're on the right track!",
+			"That's right! Well done!",
+			"Correct! Keep up the good work!",
+		}
+		return correctFeedback[rand.Intn(len(correctFeedback))]
+	} else {
+		incorrectFeedback := []string{
+			"Not quite. Try again!",
+			"That's not correct. Keep learning!",
+			"Incorrect. Review this topic and try again.",
+			"Wrong answer. Don't give up!",
+			"That's not right. Let's keep practicing!",
+		}
+		return incorrectFeedback[rand.Intn(len(incorrectFeedback))]
+	}
 }
